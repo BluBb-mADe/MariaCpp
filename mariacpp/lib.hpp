@@ -24,38 +24,34 @@ namespace MariaCpp {
 // DEPRICATED: use real_escape_string()
 // unsigned long escape_string(char *to, const char *from, unsigned long len);
 
-const char *get_client_info();
+    const char* get_client_info();
 
-unsigned long get_client_version();
+    unsigned long get_client_version();
 
-unsigned long hex_string(char *to, const char *from, unsigned long length);
+    unsigned long hex_string(char* to, const char* from, unsigned long length);
 
-void library_end();
+    void library_end();
 
-int library_init(int argc, char **argv, char **groups);
+    int library_init(int argc, char** argv, char** groups);
 
-int library_init();
+    int library_init();
 
-unsigned int thread_safe();
+    unsigned int thread_safe();
 
-void thread_end();
+    void thread_end();
 
-bool thread_init();
+    bool thread_init();
 
+    struct scoped_library_init {
+        scoped_library_init() { library_init(); }
 
-struct scoped_library_init
-{
-    scoped_library_init() { library_init(); }
-    ~scoped_library_init() { library_end(); }
-};
+        ~scoped_library_init() { library_end(); }
+    };
 
+    struct scoped_thread_init {
+        scoped_thread_init() { thread_init(); }
 
-struct scoped_thread_init
-{
-    scoped_thread_init() { thread_init(); }
-    ~scoped_thread_init() { thread_end(); }
-};
-
-
+        ~scoped_thread_init() { thread_end(); }
+    };
 }
 #endif

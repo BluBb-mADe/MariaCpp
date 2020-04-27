@@ -25,37 +25,31 @@
 
 namespace MariaCpp {
 
-struct Time : public MYSQL_TIME
-{
-    typedef unsigned year_t;
-    typedef unsigned month_t;
-    typedef unsigned day_t;
-    typedef unsigned hour_t;
-    typedef unsigned minute_t;
-    typedef unsigned second_t;
+    struct Time : public MYSQL_TIME {
+        typedef unsigned year_t;
+        typedef unsigned month_t;
+        typedef unsigned day_t;
+        typedef unsigned hour_t;
+        typedef unsigned minute_t;
+        typedef unsigned second_t;
 
-    Time(const MYSQL_TIME &time) : MYSQL_TIME(time) {}
+        Time(const MYSQL_TIME& time) : MYSQL_TIME(time) {}
 
-    Time(const std::string &str);
+        Time(const std::string& str);
 
-    static Time none();
+        static Time none();
 
-    static Time date(year_t year, month_t month, day_t day);
+        static Time date(year_t year, month_t month, day_t day);
 
-    static Time time(hour_t hour, minute_t minute, second_t second);
+        static Time time(hour_t hour, minute_t minute, second_t second);
 
-    static Time datetime(year_t year, month_t month, day_t day,
-                         hour_t hour, minute_t minute, second_t second);
+        static Time datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second);
 
-    void print(std::ostream &os) const;
-};
+        void print(std::ostream& os) const;
+    };
 
-
-inline std::ostream &operator<<(std::ostream &os, const Time &time)
-{
-    return time.print(os), os;
-}
-
-
+    inline std::ostream& operator<<(std::ostream& os, const Time& time) {
+        return time.print(os), os;
+    }
 }
 #endif

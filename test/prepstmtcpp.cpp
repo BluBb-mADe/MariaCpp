@@ -16,9 +16,10 @@
   or write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *****************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
 #include <mariacpp/lib.hpp>
 #include <mariacpp/connection.hpp>
-#include <mariacpp/exception.hpp>
+#include <mariacpp/mariadb_error.hpp>
 #include <mariacpp/prepared_stmt.hpp>
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/uri.hpp>
@@ -31,9 +32,7 @@
 # define unique_ptr auto_ptr
 #endif
 
-
-int test(const char *uri, const char *user, const char *passwd)
-{
+int test(const char* uri, const char* user, const char* passwd) {
     std::clog << "DB uri: " << uri << std::endl;
     std::clog << "DB user: " << user << std::endl;
     std::clog << "DB passwd: " << passwd << std::endl;
@@ -43,13 +42,12 @@ int test(const char *uri, const char *user, const char *passwd)
         conn.connect(MariaCpp::Uri(uri), user, passwd);
         conn.autocommit(true);
         std::clog << "Connected." << std::endl;
-        
+
         conn.query("CREATE TEMPORARY TABLE test"
-                    "(id INT, label CHAR(30), d DATE)");
+                   "(id INT, label CHAR(30), d DATE)");
         std::clog << "Temporary table created." << std::endl;
 
-        std::unique_ptr<MariaCpp::PreparedStatement> stmt(
-            conn.prepare("INSERT INTO test (id,label,d) values(?,?,?)"));
+        std::unique_ptr<MariaCpp::PreparedStatement> stmt(conn.prepare("INSERT INTO test (id,label,d) values(?,?,?)"));
 
         // C++-style param binding
         assert(3 == stmt->param_count());
@@ -72,8 +70,8 @@ int test(const char *uri, const char *user, const char *passwd)
         stmt->setTime(2, MariaCpp::Time("2016-01-22"));
         stmt->execute();
 
-        
-       // Select results using C-style result binding        
+
+        // Select results using C-style result binding
         std::clog << "Selecting from DB:" << std::endl;
         stmt.reset(conn.prepare("SELECT id, label, d FROM test ORDER BY id"));
         stmt->execute();
@@ -83,31 +81,29 @@ int test(const char *uri, const char *user, const char *passwd)
             else std::cout << "'" << stmt->getString(1) << "'";
             std::cout << ", date = ";
             if (stmt->isNull(2)) std::cout << "NULL";
-            else std::cout << stmt->getTime(2) ;
+            else std::cout << stmt->getTime(2);
             std::cout << std::endl;
         }
 
         conn.query("DROP TEMPORARY TABLE IF EXISTS test");
 
         // conn.close(); // optional
-    } catch (MariaCpp::Exception &e) {
+    } catch (MariaCpp::mariadb_error& e) {
         std::cerr << e << std::endl;
         return 1;
     }
     return 0;
 }
 
-
-int main()
-{
+int main() {
     MariaCpp::scoped_library_init maria_lib_init;
 
-    const char *uri = std::getenv("TEST_DB_URI");
-    const char *user = std::getenv("TEST_DB_USER");
-    const char *passwd = std::getenv("TEST_DB_PASSWD");
+    const char* uri = std::getenv("TEST_DB_URI");
+    const char* user = std::getenv("TEST_DB_USER");
+    const char* passwd = std::getenv("TEST_DB_PASSWD");
     if (!uri) uri = "tcp://localhost:3306/test";
     if (!user) user = "test";
     if (!passwd) passwd = "";
-    
+
     return test(uri, user, passwd);
 }

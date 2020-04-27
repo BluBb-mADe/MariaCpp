@@ -19,138 +19,129 @@
 #ifndef MARIACPP_RESULTSET_HPP
 #define MARIACPP_RESULTSET_HPP
 
-#include <stdint.h>
 #include <mysql.h>
+#include <cstdint>
 #include <cassert>
 #include <string>
 
 namespace MariaCpp {
 
-class Connection;
+    class Connection;
 
-class ResultSet
-{
-public:
-    ResultSet(Connection &conn, MYSQL_RES *res)
-        : _conn(conn), _res(res), _row(), _lengths() {}
+    class ResultSet {
+    public:
+        ResultSet(Connection& conn, MYSQL_RES* res) : _conn(conn), _res(res), _row(), _lengths() {}
 
-    ~ResultSet() { if (_res) mysql_free_result(_res); }
+        ~ResultSet() { if (_res) mysql_free_result(_res); }
 
-    void data_seek(my_ulonglong offset)
-        { return mysql_data_seek(_res, offset); }
+        void data_seek(my_ulonglong offset) { return mysql_data_seek(_res, offset); }
 
-    bool eof() const
-        { return mysql_eof(_res); }
+        bool eof() const { return mysql_eof(_res); }
 
-    MYSQL_FIELD *fetch_field() const
-        { return mysql_fetch_field(_res); }
-    
-    MYSQL_FIELD *fetch_field_direct(unsigned col) const
-        { assert_col(col); return mysql_fetch_field_direct(_res, col); }
+        MYSQL_FIELD* fetch_field() const { return mysql_fetch_field(_res); }
 
-    MYSQL_FIELD *fetch_fields() const
-        { return mysql_fetch_fields(_res); }
-    
-    // Better use length(col)
-    unsigned long *fetch_lengths() const
-        { return _lengths ? _lengths : _lengths = mysql_fetch_lengths(_res); }
-    
-    MYSQL_ROW fetch_row();
+        MYSQL_FIELD* fetch_field_direct(unsigned col) const {
+            assert_col(col);
+            return mysql_fetch_field_direct(_res, col);
+        }
 
-    MYSQL_FIELD_OFFSET field_seek(MYSQL_FIELD_OFFSET offset)
-        { return mysql_field_seek(_res, offset); }
+        MYSQL_FIELD* fetch_fields() const { return mysql_fetch_fields(_res); }
 
-    MYSQL_FIELD_OFFSET field_tell()
-        { return mysql_field_tell(_res); }
+        // Better use length(col)
+        unsigned long* fetch_lengths() const { return _lengths ? _lengths : _lengths = mysql_fetch_lengths(_res); }
 
-    void free_result()
-        { mysql_free_result(_res); _res = NULL; }
+        MYSQL_ROW fetch_row();
 
-    bool next()
-        { return fetch_row(); }
+        MYSQL_FIELD_OFFSET field_seek(MYSQL_FIELD_OFFSET offset) { return mysql_field_seek(_res, offset); }
 
-    unsigned int num_fields() const
-        { return mysql_num_fields(_res); }
+        MYSQL_FIELD_OFFSET field_tell() { return mysql_field_tell(_res); }
 
-    my_ulonglong num_rows() const
-        { return mysql_num_rows(_res); }
+        void free_result() {
+            mysql_free_result(_res);
+            _res = NULL;
+        }
+
+        bool next() { return fetch_row(); }
+
+        unsigned int num_fields() const { return mysql_num_fields(_res); }
+
+        my_ulonglong num_rows() const { return mysql_num_rows(_res); }
 
 #   if 80000 <= LIBMYSQL_VERSION_ID
-    enum enum_resultset_metadata result_metadata(MYSQL_RES *result)
-        { return mysql_result_metadata(_res); }
+        enum enum_resultset_metadata result_metadata(MYSQL_RES *result)
+            { return mysql_result_metadata(_res); }
 #   endif
 
-    MYSQL_ROW_OFFSET row_seek(MYSQL_ROW_OFFSET offset)
-        { return mysql_row_seek(_res, offset); }
+        MYSQL_ROW_OFFSET row_seek(MYSQL_ROW_OFFSET offset) { return mysql_row_seek(_res, offset); }
 
-    MYSQL_ROW_OFFSET row_tell()
-        { return mysql_row_tell(_res); }
+        MYSQL_ROW_OFFSET row_tell() { return mysql_row_tell(_res); }
 
-    // getRaw() might return NULL, iff column is NULL
-    const char *getRaw(unsigned col) const
-        { assert_col(col); return _row[col]; }
+        // getRaw() might return NULL, iff column is NULL
+        const char* getRaw(unsigned col) const {
+            assert_col(col);
+            return _row[col];
+        }
 
-    std::string getString(unsigned col) const;
+        std::string getString(unsigned col) const;
 
-    std::string getBinary(unsigned col) const
-        { return getString(col); }
+        std::string getBinary(unsigned col) const { return getString(col); }
 
-    int32_t getInt(unsigned col) const;
-    
-    int64_t getInt64(unsigned col) const;
-    
-    uint32_t getUInt(unsigned col) const;
-    
-    uint64_t getUInt64(unsigned col) const;
-    
-    bool getBoolean(unsigned col) const
-        { return getInt(col); }
+        int32_t getInt(unsigned col) const;
 
-    double getDouble(unsigned col) const;
+        int64_t getInt64(unsigned col) const;
 
-    bool isNull(unsigned col) const
-        { assert_col(col); return !_row[col]; }
+        uint32_t getUInt(unsigned col) const;
 
-    unsigned long length(unsigned col) const
-        { assert_col(col); return fetch_lengths() ? _lengths[col] : 0; }
-    
+        uint64_t getUInt64(unsigned col) const;
+
+        bool getBoolean(unsigned col) const { return getInt(col); }
+
+        double getDouble(unsigned col) const;
+
+        bool isNull(unsigned col) const {
+            assert_col(col);
+            return !_row[col];
+        }
+
+        unsigned long length(unsigned col) const {
+            assert_col(col);
+            return fetch_lengths() ? _lengths[col] : 0;
+        }
+
 #   ifdef MARIADB_VERSION_ID
-    int async_status() const;
 
-    void free_result_start();
+        int async_status() const;
 
-    void free_result_cont(int status);
+        void free_result_start();
 
-    MYSQL_ROW fetch_row_start();
+        void free_result_cont(int status);
 
-    MYSQL_ROW fetch_row_cont(int status);
+        MYSQL_ROW fetch_row_start();
 
-    bool next_start() { return fetch_row_start(); }
+        MYSQL_ROW fetch_row_cont(int status);
 
-    bool next_cont(int status) { return fetch_row_cont(status); }
+        bool next_start() { return fetch_row_start(); }
+
+        bool next_cont(int status) { return fetch_row_cont(status); }
+
 #   endif /* MARIADB_VERSION_ID */
 
-private:
-    inline void assert_col(unsigned col) const;
+    private:
+        inline void assert_col(unsigned col) const;
 
-    // Noncopyable
-    ResultSet(const ResultSet &);
-    void operator=(ResultSet &);
+        // Noncopyable
+        ResultSet(const ResultSet&);
 
-    Connection &_conn;
-    MYSQL_RES *_res;
-    MYSQL_ROW _row; // _row == _res->current_row
-    mutable unsigned long *_lengths; // == fetch_lengths()
-};
+        void operator=(ResultSet&);
 
+        Connection& _conn;
+        MYSQL_RES* _res;
+        MYSQL_ROW _row; // _row == _res->current_row
+        mutable unsigned long* _lengths; // == fetch_lengths()
+    };
 
-
-void
-ResultSet::assert_col(unsigned col) const
-{
-    assert(col < _res->field_count);
-}
-
-
+    void ResultSet::assert_col(unsigned col) const {
+        assert(col < _res->field_count);
+    }
 }
 #endif

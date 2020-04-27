@@ -16,9 +16,10 @@
   or write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *****************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
 #include <mariacpp/lib.hpp>
 #include <mariacpp/connection.hpp>
-#include <mariacpp/exception.hpp>
+#include <mariacpp/mariadb_error.hpp>
 #include <mariacpp/prepared_stmt.hpp>
 #include <mariacpp/time.hpp>
 #include <mariacpp/uri.hpp>
@@ -30,36 +31,32 @@
 # define unique_ptr auto_ptr
 #endif
 
-
 using namespace MariaCpp;
 
-const char *uri = "tcp://localhost:3306/test";
-const char *user = "test";
-const char *passwd = "";
+const char* uri = "tcp://localhost:3306/test";
+const char* user = "test";
+const char* passwd = "";
 
 void get_env() {
-    const char *env = std::getenv("TEST_DB_URI");
+    const char* env = std::getenv("TEST_DB_URI");
     if (env) uri = env;
     env = std::getenv("TEST_DB_USER");
     if (env) user = env;
     env = std::getenv("TEST_DB_PASSWD");
     if (env) passwd = env;
-    
 }
 
-int main()
-{
+int main() {
     scoped_library_init maria_lib_init;
     get_env();
 
     try {
         Connection conn;
         conn.connect(Uri(uri), user, passwd);
-        
+
         conn.query("CREATE TEMPORARY TABLE test "
-                    "(i INT, s CHAR(15), d DATETIME)");
-        std::unique_ptr<PreparedStatement> stmt(
-            conn.prepare("INSERT INTO test (i,s,d) values(?,?,?)"));
+                   "(i INT, s CHAR(15), d DATETIME)");
+        std::unique_ptr<PreparedStatement> stmt(conn.prepare("INSERT INTO test (i,s,d) values(?,?,?)"));
 
         assert(3 == stmt->param_count());
         stmt->setInt(0, 1);
@@ -79,11 +76,11 @@ int main()
             std::cout << ", s = ";
             if (stmt->isNull(1)) std::cout << "NULL";
             else std::cout << stmt->getString(1);
-            std::cout << ", d = " << stmt->getTime(2) ;
+            std::cout << ", d = " << stmt->getTime(2);
             std::cout << std::endl;
         }
         conn.close();
-    } catch (Exception &e) {
+    } catch (mariadb_error& e) {
         std::cerr << e << std::endl;
         return 1;
     }

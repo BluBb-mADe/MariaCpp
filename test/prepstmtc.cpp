@@ -16,9 +16,10 @@
   or write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *****************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
 #include <mariacpp/lib.hpp>
 #include <mariacpp/connection.hpp>
-#include <mariacpp/exception.hpp>
+#include <mariacpp/mariadb_error.hpp>
 #include <mariacpp/prepared_stmt.hpp>
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/uri.hpp>
@@ -30,9 +31,7 @@
 # define unique_ptr auto_ptr
 #endif
 
-
-int test(const char *uri, const char *user, const char *passwd)
-{
+int test(const char* uri, const char* user, const char* passwd) {
     std::clog << "DB uri: " << uri << std::endl;
     std::clog << "DB user: " << user << std::endl;
     std::clog << "DB passwd: " << passwd << std::endl;
@@ -42,9 +41,9 @@ int test(const char *uri, const char *user, const char *passwd)
         conn.connect(MariaCpp::Uri(uri), user, passwd);
         conn.autocommit(true);
         std::clog << "Connected." << std::endl;
-        
+
         conn.query("CREATE TEMPORARY TABLE test"
-                    "(id INT, label CHAR(15), d DATE)");
+                   "(id INT, label CHAR(15), d DATE)");
         std::clog << "Temporary table created." << std::endl;
 
         MariaCpp::PreparedStatement stmt(conn);
@@ -58,18 +57,18 @@ int test(const char *uri, const char *user, const char *passwd)
         my_bool null_d = true;
         MYSQL_BIND bind[3] = {0};
         bind[0].buffer_type = MYSQL_TYPE_LONG;
-        bind[0].buffer = (char *)&data_id;
+        bind[0].buffer = (char*) &data_id;
         // bind[0].buffer_length = 4;
         bind[1].buffer_type = MYSQL_TYPE_STRING;
         bind[1].buffer = &data_label;
         bind[1].buffer_length = 1;
         bind[2].buffer_type = MYSQL_TYPE_DATE;
-        bind[2].buffer = (char *)&data_d;
+        bind[2].buffer = (char*) &data_d;
         // bind[2].buffer_length = sizeof(MYSQL_TIME);
         bind[2].is_null = &null_d;
         stmt.bind_param(bind);
         stmt.execute();
-        
+
         data_id = 2;
         data_label = 'b';
         stmt.execute();
@@ -88,7 +87,7 @@ int test(const char *uri, const char *user, const char *passwd)
         data_d.month = 1;
         stmt.execute();
         std::clog << "Insert done." << std::endl;
-        
+
         // Select results using C-style result binding        
         std::clog << "Selecting from DB:" << std::endl;
 
@@ -96,36 +95,32 @@ int test(const char *uri, const char *user, const char *passwd)
         stmt.bind_result(bind);
         stmt.execute();
         while (stmt.fetch()) {
-            std::cout << "id = " << data_id
-                      << ", label = '" << data_label << "'"
-                      << ", date = ";
+            std::cout << "id = " << data_id << ", label = '" << data_label << "'" << ", date = ";
             if (null_d) std::cout << "NULL";
-            else std::cout << data_d.year << '-' << data_d.month
-                           << '-' << data_d.day;
+            else
+                std::cout << data_d.year << '-' << data_d.month << '-' << data_d.day;
             std::cout << std::endl;
         }
 
         conn.query("DROP TEMPORARY TABLE IF EXISTS test");
 
         // conn.close(); // optional
-    } catch (MariaCpp::Exception &e) {
+    } catch (MariaCpp::mariadb_error& e) {
         std::cerr << e << std::endl;
         return 1;
     }
     return 0;
 }
 
-
-int main()
-{
+int main() {
     MariaCpp::scoped_library_init maria_lib_init;
 
-    const char *uri = std::getenv("TEST_DB_URI");
-    const char *user = std::getenv("TEST_DB_USER");
-    const char *passwd = std::getenv("TEST_DB_PASSWD");
+    const char* uri = std::getenv("TEST_DB_URI");
+    const char* user = std::getenv("TEST_DB_USER");
+    const char* passwd = std::getenv("TEST_DB_PASSWD");
     if (!uri) uri = "tcp://localhost:3306/test";
     if (!user) user = "test";
     if (!passwd) passwd = "";
-    
+
     return test(uri, user, passwd);
 }

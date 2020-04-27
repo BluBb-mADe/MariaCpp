@@ -20,76 +20,57 @@
 #include <ostream>
 
 extern "C" {
-size_t mariacpp_time_to_string(const MYSQL_TIME *tm, char *time_str,size_t len);
-my_bool mariacpp_str_to_TIME(const char *str, size_t length, MYSQL_TIME *tm);
+size_t mariacpp_time_to_string(const MYSQL_TIME* tm, char* time_str, size_t len);
+my_bool mariacpp_str_to_TIME(const char* str, size_t length, MYSQL_TIME* tm);
 }
 
 namespace MariaCpp {
 
+    Time::Time(const std::string& str) : MYSQL_TIME() {
+        if (mariacpp_str_to_TIME(str.data(), str.length(), this))
+            time_type = MYSQL_TIMESTAMP_ERROR;
+    }
 
-Time::Time(const std::string &str)
-    : MYSQL_TIME()
-{
-    if (mariacpp_str_to_TIME(str.data(), str.length(), this))
-        time_type = MYSQL_TIMESTAMP_ERROR;
-}
+    Time Time::none() {
+        MYSQL_TIME tm = MYSQL_TIME();
+        tm.time_type = MYSQL_TIMESTAMP_NONE;
+        return tm;
+    }
 
-Time
-Time::none()
-{
-    MYSQL_TIME tm = MYSQL_TIME();
-    tm.time_type = MYSQL_TIMESTAMP_NONE;
-    return tm;
-}
+    Time Time::date(year_t year, month_t month, day_t day) {
+        MYSQL_TIME tm = MYSQL_TIME();
+        tm.year = year;
+        tm.month = month;
+        tm.day = day;
+        tm.time_type = MYSQL_TIMESTAMP_DATE;
+        return tm;
+    }
 
+    Time Time::datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second) {
+        MYSQL_TIME tm = MYSQL_TIME();
+        tm.year = year;
+        tm.month = month;
+        tm.day = day;
+        tm.hour = hour;
+        tm.minute = minute;
+        tm.second = second;
+        tm.time_type = MYSQL_TIMESTAMP_DATETIME;
+        return tm;
+    }
 
-Time
-Time::date(year_t year, month_t month, day_t day)
-{
-    MYSQL_TIME tm = MYSQL_TIME();
-    tm.year = year;
-    tm.month = month;
-    tm.day = day;
-    tm.time_type = MYSQL_TIMESTAMP_DATE;
-    return tm;
-}
+    Time Time::time(hour_t hour, minute_t minute, second_t second) {
+        MYSQL_TIME tm = MYSQL_TIME();
+        tm.hour = hour;
+        tm.minute = minute;
+        tm.second = second;
+        tm.time_type = MYSQL_TIMESTAMP_TIME;
+        return tm;
+    }
 
-
-Time
-Time::datetime(year_t year, month_t month, day_t day,
-               hour_t hour, minute_t minute, second_t second)
-{
-    MYSQL_TIME tm = MYSQL_TIME();
-    tm.year = year;
-    tm.month = month;
-    tm.day = day;
-    tm.hour = hour;
-    tm.minute = minute;
-    tm.second = second;
-    tm.time_type = MYSQL_TIMESTAMP_DATETIME;
-    return tm;
-}
-
-
-Time
-Time::time(hour_t hour, minute_t minute, second_t second)
-{
-    MYSQL_TIME tm = MYSQL_TIME();
-    tm.hour = hour;
-    tm.minute = minute;
-    tm.second = second;
-    tm.time_type = MYSQL_TIMESTAMP_TIME;
-    return tm;
-}
-
-
-void
-Time::print(std::ostream &os) const
-{
-    char buff[40];
-    size_t len = mariacpp_time_to_string(this, buff, sizeof(buff)-1);
-    buff[len] = '\0';
-    os << buff;
-}
-
+    void Time::print(std::ostream& os) const {
+        char buff[40];
+        size_t len = mariacpp_time_to_string(this, buff, sizeof(buff) - 1);
+        buff[len] = '\0';
+        os << buff;
+    }
 }

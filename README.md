@@ -83,7 +83,7 @@ int main()
             std::cout << std::endl;
         }
         conn.close();
-    } catch (Exception &e) {
+    } catch (mariadb_error &e) {
         std::cerr << e << std::endl;
         return 1;
     }

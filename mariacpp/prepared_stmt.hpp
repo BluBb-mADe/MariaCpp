@@ -19,271 +19,254 @@
 #ifndef MARIACPP_PREPARED_STATEMENT_HPP
 #define MARIACPP_PREPARED_STATEMENT_HPP
 
-#include <stdint.h>
 #include <mysql.h>
+#include <cstdint>
 #include <string>
 
 namespace MariaCpp {
 
-class Connection;
-class Bind;
-class ResultSet;
-struct Time;
+    class Connection;
 
-class PreparedStatement
-{
-public:
-    typedef unsigned int idx_t;
-    
-    PreparedStatement(Connection &conn);
+    class Bind;
 
-    ~PreparedStatement(); // like close() but cannot throw
+    class ResultSet;
 
-    my_ulonglong affected_rows() const
-        { return mysql_stmt_affected_rows(_stmt); }
+    struct Time;
 
-    void attr_get(enum enum_stmt_attr_type option, void *arg) const;
+    class PreparedStatement {
+    public:
+        typedef unsigned int idx_t;
 
-    void attr_set(enum enum_stmt_attr_type option, const void *arg);
+        PreparedStatement(Connection& conn);
 
-    // Optional C-style param binding
-    void bind_param(MYSQL_BIND *bind);
+        ~PreparedStatement(); // like close() but cannot throw
 
-    // Optional C-style result binding
-    void bind_result(MYSQL_BIND *bind);
+        my_ulonglong affected_rows() const { return mysql_stmt_affected_rows(_stmt); }
 
-    // After close() this object cannot be used any longer
-    void close(); // can throw
+        void attr_get(enum enum_stmt_attr_type option, void* arg) const;
 
-    void data_seek(my_ulonglong offset)
-        { return mysql_stmt_data_seek(_stmt, offset); }
+        void attr_set(enum enum_stmt_attr_type option, const void* arg);
 
-    unsigned int errorno() const
-        { return mysql_stmt_errno(_stmt); }
+        // Optional C-style param binding
+        void bind_param(MYSQL_BIND* bind);
 
-    const char *error_str() const
-        { return mysql_stmt_error(_stmt); }
+        // Optional C-style result binding
+        void bind_result(MYSQL_BIND* bind);
 
-    void execute();
+        // After close() this object cannot be used any longer
+        void close(); // can throw
 
-    // True if last fetch() was truncated (returned MYSQL_DATA_TRUNCATED)
-    // Is useful only with C-style param binding
-    bool truncated() const { return _truncated; }
+        void data_seek(my_ulonglong offset) { return mysql_stmt_data_seek(_stmt, offset); }
 
-    bool fetch();
+        unsigned int errorno() const { return mysql_stmt_errno(_stmt); }
 
-    void fetch_column(Bind &bind, unsigned int column, unsigned long offset);
+        const char* error_str() const { return mysql_stmt_error(_stmt); }
 
-    unsigned int field_count() const
-        { return mysql_stmt_field_count(_stmt); }
-    
+        void execute();
+
+        // True if last fetch() was truncated (returned MYSQL_DATA_TRUNCATED)
+        // Is useful only with C-style param binding
+        bool truncated() const { return _truncated; }
+
+        bool fetch();
+
+        void fetch_column(Bind& bind, unsigned int column, unsigned long offset);
+
+        unsigned int field_count() const { return mysql_stmt_field_count(_stmt); }
+
 #   if 50500 <= MYSQL_VERSION_ID
-    void free_result()
-        { if (mysql_stmt_free_result(_stmt)) throw_exception(); }
+
+        void free_result() { if (mysql_stmt_free_result(_stmt)) throw_exception(); }
+
 #   endif
 
-    my_ulonglong insert_id() const
-        { return mysql_stmt_insert_id(_stmt); }
+        my_ulonglong insert_id() const { return mysql_stmt_insert_id(_stmt); }
 
-    bool next_result();
+        bool next_result();
 
-    my_ulonglong num_rows() const
-        { return mysql_stmt_num_rows(_stmt); }
+        my_ulonglong num_rows() const { return mysql_stmt_num_rows(_stmt); }
 
-    unsigned long param_count() const
-        { return mysql_stmt_param_count(_stmt); }
-    
-    // In most cases don't call prepare() directly!
-    // Use: Connection::prepare(const std::string &)
-    void prepare(const std::string &sql);
+        unsigned long param_count() const { return mysql_stmt_param_count(_stmt); }
 
-    void reset();
+        // In most cases don't call prepare() directly!
+        // Use: Connection::prepare(const std::string &)
+        void prepare(const std::string& sql);
 
-    ResultSet *result_metadata();
-    
-    MYSQL_ROW_OFFSET row_seek(MYSQL_ROW_OFFSET offset)
-        { return mysql_stmt_row_seek(_stmt, offset); }
-    
-    MYSQL_ROW_OFFSET row_tell() const
-        { return mysql_stmt_row_tell(_stmt); }
+        void reset();
 
-    void send_long_data(idx_t col, const char *data, unsigned long length)
-        { if (mysql_stmt_send_long_data(_stmt, col, data, length))
-                throw_exception(); }
-    
-    const char *sqlstate() const
-        { return mysql_stmt_sqlstate(_stmt); }
+        ResultSet* result_metadata();
 
-    void store_result()
-        { if (mysql_stmt_store_result(_stmt)) throw_exception(); }
-    
-    // Methods for Connector/C++ style param binding
+        MYSQL_ROW_OFFSET row_seek(MYSQL_ROW_OFFSET offset) { return mysql_stmt_row_seek(_stmt, offset); }
 
-    void setNull(idx_t col);
+        MYSQL_ROW_OFFSET row_tell() const { return mysql_stmt_row_tell(_stmt); }
 
-    void setTinyInt(idx_t col, int8_t value);
-    
-    void setUTinyInt(idx_t col, uint8_t value);
-    
-    void setSmallInt(idx_t col, int16_t value);
-    
-    void setUSmallInt(idx_t col, uint16_t value);
-    
-    void setYear(idx_t col, uint16_t value);
-    
-    void setMediumInt(idx_t col, int32_t value);
-    
-    void setUMediumInt(idx_t col, uint32_t value);
-    
-    void setInt(idx_t col, int32_t value);
-    
-    void setUInt(idx_t col, uint32_t value);
-    
-    void setBigInt(idx_t col, int64_t value);
-    
-    void setUBigInt(idx_t col, uint64_t value);
+        void send_long_data(idx_t col, const char* data, unsigned long length) {
+            if (mysql_stmt_send_long_data(_stmt, col, data, length))
+                throw_exception();
+        }
 
-    void setBlob(idx_t col, const std::string &v);
-    
-    void setBoolean(idx_t col, bool value);
-    
-    void setDouble(idx_t col, double value);
+        const char* sqlstate() const { return mysql_stmt_sqlstate(_stmt); }
 
-    void setFloat(idx_t col, float value);
+        void store_result() { if (mysql_stmt_store_result(_stmt)) throw_exception(); }
 
-    // This is special: str==NULL is allowed
-    void setString(idx_t col, const char *str);
-    
-    void setString(idx_t col, const std::string &str);
-    
-    void setBinary(idx_t col, const std::string &v)
-        { return setBlob(col, v); }
-    
-    void setChar(idx_t col, char c)
-        { return setString(col, std::string(1, c)); }
+        // Methods for Connector/C++ style param binding
 
-    void setChar(idx_t col, const std::string &v)
-        { return setString(col, v); }
+        void setNull(idx_t col);
 
-    void setText(idx_t col, const std::string &v)
-        { return setString(col, v); }
-    
-    void setVarBinary(idx_t col, const std::string &v)
-        { return setBlob(col, v); }
-    
-    void setVarChar(idx_t col, const std::string &v)
-        { return setString(col, v); }
-    
-    void setDate(idx_t col, const Time &time)
-        { return setDateTime(col, time); }
+        void setTinyInt(idx_t col, int8_t value);
 
-    void setDateTime(idx_t col, const Time &time);
+        void setUTinyInt(idx_t col, uint8_t value);
 
-    void setTime(idx_t col, const Time &time)
-        { return setDateTime(col, time); }
+        void setSmallInt(idx_t col, int16_t value);
 
-    void setTimeStamp(idx_t col, const Time &time)
-        { return setDateTime(col, time); }
+        void setUSmallInt(idx_t col, uint16_t value);
 
-    bool isNull(idx_t col) const;
+        void setYear(idx_t col, uint16_t value);
 
-    std::string getString(idx_t col) const;
+        void setMediumInt(idx_t col, int32_t value);
 
-    std::string getBinary(idx_t col) const
-        { return getString(col); }
+        void setUMediumInt(idx_t col, uint32_t value);
 
-    int32_t getInt(idx_t col) const;
+        void setInt(idx_t col, int32_t value);
 
-    uint32_t getUInt(idx_t col) const;
+        void setUInt(idx_t col, uint32_t value);
 
-    int64_t getBigInt(idx_t col) const;
+        void setBigInt(idx_t col, int64_t value);
 
-    uint64_t getUBigInt(idx_t col) const;
+        void setUBigInt(idx_t col, uint64_t value);
 
-    Time getDate(idx_t col) const; // same as getDateTime(col)
+        void setBlob(idx_t col, const std::string& v);
 
-    Time getDateTime(idx_t col) const;
+        void setBoolean(idx_t col, bool value);
 
-    Time getTime(idx_t col) const; // same as getDateTime(col)
+        void setDouble(idx_t col, double value);
 
-    Time getTimeStamp(idx_t col) const; // same as getDateTime(col)
+        void setFloat(idx_t col, float value);
+
+        // This is special: str==NULL is allowed
+        void setString(idx_t col, const char* str);
+
+        void setString(idx_t col, const std::string& str);
+
+        void setBinary(idx_t col, const std::string& v) { return setBlob(col, v); }
+
+        void setChar(idx_t col, char c) { return setString(col, std::string(1, c)); }
+
+        void setChar(idx_t col, const std::string& v) { return setString(col, v); }
+
+        void setText(idx_t col, const std::string& v) { return setString(col, v); }
+
+        void setVarBinary(idx_t col, const std::string& v) { return setBlob(col, v); }
+
+        void setVarChar(idx_t col, const std::string& v) { return setString(col, v); }
+
+        void setDate(idx_t col, const Time& time) { return setDateTime(col, time); }
+
+        void setDateTime(idx_t col, const Time& time);
+
+        void setTime(idx_t col, const Time& time) { return setDateTime(col, time); }
+
+        void setTimeStamp(idx_t col, const Time& time) { return setDateTime(col, time); }
+
+        bool isNull(idx_t col) const;
+
+        std::string getString(idx_t col) const;
+
+        std::string getBinary(idx_t col) const { return getString(col); }
+
+        int32_t getInt(idx_t col) const;
+
+        uint32_t getUInt(idx_t col) const;
+
+        int64_t getBigInt(idx_t col) const;
+
+        uint64_t getUBigInt(idx_t col) const;
+
+        Time getDate(idx_t col) const; // same as getDateTime(col)
+
+        Time getDateTime(idx_t col) const;
+
+        Time getTime(idx_t col) const; // same as getDateTime(col)
+
+        Time getTimeStamp(idx_t col) const; // same as getDateTime(col)
 
 #   ifdef MARIADB_VERSION_ID
-    int async_status() const;
 
-    bool next_result_start();
+        int async_status() const;
 
-    bool next_result_cont(int status);
+        bool next_result_start();
 
-    void prepare_start(const std::string &sql)
-        { return prepare_start(sql.data(), sql.length()); }
+        bool next_result_cont(int status);
 
-    void prepare_start(const char *query, unsigned long length);
+        void prepare_start(const std::string& sql) {
+            return prepare_start(sql.data(), static_cast<unsigned long>(sql.length()));
+        }
 
-    void prepare_cont(int status);
+        void prepare_start(const char* query, unsigned long length);
 
-    void execute_start();
+        void prepare_cont(int status);
 
-    void execute_cont(int status);
+        void execute_start();
 
-    bool fetch_start();
+        void execute_cont(int status);
 
-    bool fetch_cont(int status);
+        bool fetch_start();
 
-    void store_result_start();
+        bool fetch_cont(int status);
 
-    void store_result_cont(int status);
+        void store_result_start();
 
-    void close_start();
+        void store_result_cont(int status);
 
-    void close_cont(int status);
+        void close_start();
 
-    void reset_start();
+        void close_cont(int status);
 
-    void reset_cont(int status);
+        void reset_start();
 
-    void free_result_start();
+        void reset_cont(int status);
 
-    void free_result_cont(int status);
+        void free_result_start();
 
-    void send_long_data_start(unsigned int param_number, const char *data,
-                              unsigned long len);
+        void free_result_cont(int status);
 
-    void send_long_data_cont(int status);
+        void send_long_data_start(unsigned int param_number, const char* data, unsigned long len);
+
+        void send_long_data_cont(int status);
+
 #   endif
 
-private:
-    // Noncopyable
-    PreparedStatement(const PreparedStatement &);
-    void operator=(PreparedStatement &);
+    private:
+        // Noncopyable
+        PreparedStatement(const PreparedStatement&);
 
-    // Implicit convertion from char* to std::string not allowed
-    // Please use setCString(idx_t, const char *) instead!
-    // void setString(idx_t col, const char *str);
+        void operator=(PreparedStatement&);
 
-    void throw_exception();
+        // Implicit convertion from char* to std::string not allowed
+        // Please use setCString(idx_t, const char *) instead!
+        // void setString(idx_t col, const char *str);
 
-    inline Bind &param(idx_t col);
+        void throw_exception();
 
-    inline const Bind &result(idx_t col) const;
+        inline Bind& param(idx_t col);
 
-    inline void do_reset_bind();
+        inline const Bind& result(idx_t col) const;
 
-    inline void do_bind_params();
+        inline void do_reset_bind();
 
-    inline void do_bind_results();
+        inline void do_bind_params();
 
-    inline void do_rebind_results();
+        inline void do_bind_results();
 
-    Connection &_conn;
-    MYSQL_STMT *_stmt;
-    Bind *_params;
-    Bind *_results;
-    bool _truncated;
-    bool _bind_params; // C++ style binding
-    bool _bind_results;
-};
+        inline void do_rebind_results();
 
-
+        Connection& _conn;
+        MYSQL_STMT* _stmt;
+        Bind* _params;
+        Bind* _results;
+        bool _truncated;
+        bool _bind_params; // C++ style binding
+        bool _bind_results;
+    };
 }
 #endif

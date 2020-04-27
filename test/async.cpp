@@ -16,9 +16,10 @@
   or write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *****************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
 #include <mariacpp/lib.hpp>
 #include <mariacpp/connection.hpp>
-#include <mariacpp/exception.hpp>
+#include <mariacpp/mariadb_error.hpp>
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/uri.hpp>
 #include <cstdlib>
@@ -29,9 +30,7 @@
 # define unique_ptr auto_ptr
 #endif
 
-
-int test(const char *uri, const char *user, const char *passwd)
-{
+int test(const char* uri, const char* user, const char* passwd) {
     std::clog << "DB uri: " << uri << std::endl;
     std::clog << "DB user: " << user << std::endl;
     std::clog << "DB passwd: " << passwd << std::endl;
@@ -39,8 +38,8 @@ int test(const char *uri, const char *user, const char *passwd)
 #   ifdef MARIADB_VERSION_ID
     try {
         MariaCpp::Connection conn;
-        unsigned default_timeout= 3;
-        conn.options(MYSQL_OPT_NONBLOCK, 0);
+        unsigned default_timeout = 3;
+        conn.options(MYSQL_OPT_NONBLOCK, nullptr);
         conn.options(MYSQL_OPT_CONNECT_TIMEOUT, &default_timeout);
         conn.options(MYSQL_OPT_READ_TIMEOUT, &default_timeout);
         conn.options(MYSQL_OPT_WRITE_TIMEOUT, &default_timeout);
@@ -77,11 +76,8 @@ int test(const char *uri, const char *user, const char *passwd)
             while (res->async_status())
                 next = res->next_cont(conn.async_wait());
             while (next) {
-                std::cout << "id = " << res->getInt(0)
-                          << ", label = '" << res->getRaw(1)<< "'"
-                          << ", date = "
-                          << (res->isNull(2) ?"NULL":res->getString(2).c_str())
-                          << std::endl;
+                std::cout << "id = " << res->getInt(0) << ", label = '" << res->getRaw(1) << "'" << ", date = "
+                          << (res->isNull(2) ? "NULL" : res->getString(2).c_str()) << std::endl;
                 next = res->next_start();
                 while (res->async_status())
                     next = res->next_cont(conn.async_wait());
@@ -93,7 +89,7 @@ int test(const char *uri, const char *user, const char *passwd)
         while (conn.async_status()) conn.query_cont(conn.async_wait());
 
         // conn.close(); // optional
-    } catch (MariaCpp::Exception &e) {
+    } catch (MariaCpp::mariadb_error& e) {
         std::cerr << e << std::endl;
         return 1;
     }
@@ -101,14 +97,12 @@ int test(const char *uri, const char *user, const char *passwd)
     return 0;
 }
 
-
-int main()
-{
+int main() {
     MariaCpp::scoped_library_init maria_lib_init;
 
-    const char *uri = std::getenv("TEST_DB_URI");
-    const char *user = std::getenv("TEST_DB_USER");
-    const char *passwd = std::getenv("TEST_DB_PASSWD");
+    const char* uri = std::getenv("TEST_DB_URI");
+    const char* user = std::getenv("TEST_DB_USER");
+    const char* passwd = std::getenv("TEST_DB_PASSWD");
     if (!uri) uri = "tcp://localhost:3306/test";
     if (!user) user = "test";
     if (!passwd) passwd = "";

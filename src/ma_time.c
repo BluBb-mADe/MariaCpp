@@ -23,89 +23,75 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #ifndef SEC_PART_DIGITS
 #define SEC_PART_DIGITS 6
 #endif
 
-size_t mariacpp_time_to_string(const MYSQL_TIME *tm, char *time_str, size_t len)
-{
-  size_t length;
+size_t mariacpp_time_to_string(const MYSQL_TIME* tm, char* time_str, size_t len) {
+    size_t length;
 
-  if (!time_str || !len)
-    return 0;
+    if (!time_str || !len)
+        return 0;
 
-  unsigned int digits= MIN((tm->second_part) ? SEC_PART_DIGITS : 0, 15);
+    unsigned int digits = MIN((tm->second_part) ? SEC_PART_DIGITS : 0, 15);
 
-  switch(tm->time_type) {
-    case MYSQL_TIMESTAMP_DATE:
-      length= snprintf(time_str, len, "%04u-%02u-%02u", tm->year, tm->month, tm->day);
-      digits= 0;
-      break;
-    case MYSQL_TIMESTAMP_DATETIME:
-      length= snprintf(time_str, len, "%04u-%02u-%02u %02u:%02u:%02u", 
-                      tm->year, tm->month, tm->day, tm->hour, tm->minute, tm->second);
-      break;
-    case MYSQL_TIMESTAMP_TIME:
-      length= snprintf(time_str, len, "%s%02u:%02u:%02u",
-                       (tm->neg ? "-" : ""), tm->hour, tm->minute, tm->second);
-    break;
-    default:
-      time_str[0]= '\0';
-      return 0;
-      break;
-  }
-  if (digits && (len < length))
-  {
-    char helper[16];
-    snprintf(helper, 16, ".%%0%du", digits);
-    length+= snprintf(time_str + length, len - length, helper, digits);
-  }
-  return length;
+    switch (tm->time_type) {
+        case MYSQL_TIMESTAMP_DATE:
+            length = snprintf(time_str, len, "%04u-%02u-%02u", tm->year, tm->month, tm->day);
+            digits = 0;
+            break;
+        case MYSQL_TIMESTAMP_DATETIME:
+            length = snprintf(time_str, len, "%04u-%02u-%02u %02u:%02u:%02u", tm->year, tm->month, tm->day, tm->hour, tm->minute, tm->second);
+            break;
+        case MYSQL_TIMESTAMP_TIME:
+            length = snprintf(time_str, len, "%s%02u:%02u:%02u", (tm->neg ? "-" : ""), tm->hour, tm->minute, tm->second);
+            break;
+        default:
+            time_str[0] = '\0';
+            return 0;
+    }
+    if (digits && (len < length)) {
+        char helper[16];
+        snprintf(helper, 16, ".%%0%du", digits);
+        length += snprintf(time_str + length, len - length, helper, digits);
+    }
+    return length;
 }
 
 // Copied from my_stmt_codec.c
-my_bool mariacpp_str_to_TIME(const char *str, size_t length, MYSQL_TIME *tm)
-{
-  my_bool is_time=0, is_date=0, has_time_frac=0;
-  char *p= (char *)str;
+my_bool mariacpp_str_to_TIME(const char* str, size_t length, MYSQL_TIME* tm) {
+    my_bool is_time = 0, is_date = 0, has_time_frac = 0;
+    char* p;
 
-  if ((p= strchr(str, '-')) && p <= str + length)
-    is_date= 1;
-  if ((p= strchr(str, ':')) && p <= str + length)
-    is_time= 1;
-  if ((p= strchr(str, '.')) && p <= str + length)
-    has_time_frac= 1;
+    if ((p = strchr(str, '-')) && p <= str + length)
+        is_date = 1;
+    if ((p = strchr(str, ':')) && p <= str + length)
+        is_time = 1;
+    if ((p = strchr(str, '.')) && p <= str + length)
+        has_time_frac = 1;
 
-  p= (char *)str;
- 
-  memset(tm, 0, sizeof(MYSQL_TIME));
+    p = (char*) str;
 
-  if (is_date)
-  {
-    sscanf(str, "%d-%d-%d", &tm->year, &tm->month, &tm->day);
-    p= strchr(str, ' ');
-    if (!p)
-    {
-      tm->time_type= MYSQL_TIMESTAMP_DATE;
-      return 0;
+    memset(tm, 0, sizeof(MYSQL_TIME));
+
+    if (is_date) {
+        sscanf_s(str, "%d-%d-%d", &tm->year, &tm->month, &tm->day);
+        p = strchr(str, ' ');
+        if (!p) {
+            tm->time_type = MYSQL_TIMESTAMP_DATE;
+            return 0;
+        }
     }
-  }
-  if (has_time_frac)
-  {
-    sscanf(p, "%d:%d:%d.%ld", &tm->hour, &tm->minute, &tm->second, &tm->second_part);
-    tm->time_type= (is_date) ? MYSQL_TIMESTAMP_DATETIME : MYSQL_TIMESTAMP_TIME;
-    return 0;
-  }
-  if (is_time)
-  {
-    sscanf(p, "%d:%d:%d", &tm->hour, &tm->minute, &tm->second);
-    tm->time_type= (is_date) ? MYSQL_TIMESTAMP_DATETIME : MYSQL_TIMESTAMP_TIME;
-    return 0;
-  }
-  return 1;
+    if (has_time_frac) {
+        sscanf_s(p, "%d:%d:%d.%ld", &tm->hour, &tm->minute, &tm->second, &tm->second_part);
+        tm->time_type = (is_date) ? MYSQL_TIMESTAMP_DATETIME : MYSQL_TIMESTAMP_TIME;
+        return 0;
+    }
+    if (is_time) {
+        sscanf_s(p, "%d:%d:%d", &tm->hour, &tm->minute, &tm->second);
+        tm->time_type = (is_date) ? MYSQL_TIMESTAMP_DATETIME : MYSQL_TIMESTAMP_TIME;
+        return 0;
+    }
+    return 1;
 }
-
-
-
-  

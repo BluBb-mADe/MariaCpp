@@ -42,13 +42,16 @@ SET_TESTS_PROPERTIES(
 
 link_libraries(
   mariacpp
-  ${MARIADB_LIBRARY})  
+  ws2_32
+  "${MARIADB_LIBRARY_DIR}/libmariadb.lib")
 include_directories(
   ${MARIADB_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR})
 
 add_executable(connect connect.cpp)
-add_executable(threads threads.cpp)
+if(CMAKE_USE_PTHREADS_INIT)
+    add_executable(threads threads.cpp)
+endif()
 add_executable(query query.cpp)
 add_executable(prepstmtc prepstmtc.cpp)
 add_executable(prepstmtcpp prepstmtcpp.cpp)

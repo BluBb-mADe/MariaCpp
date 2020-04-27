@@ -23,52 +23,46 @@
 
 namespace MariaCpp {
 
-class Uri
-{
-public:
-    enum Protocol // == mysql_protocol_type
-    {
-        PROTOCOL_DEFAULT, PROTOCOL_TCP, PROTOCOL_SOCKET,
-        PROTOCOL_PIPE, PROTOCOL_MEMORY
+    class Uri {
+    public:
+        enum Protocol // == mysql_protocol_type
+        {
+            PROTOCOL_DEFAULT, PROTOCOL_TCP, PROTOCOL_SOCKET, PROTOCOL_PIPE, PROTOCOL_MEMORY
+        };
+
+        Uri(const std::string& str);
+
+        int port() const { return _port; }
+
+        Protocol protocol() const { return _protocol; }
+
+        const char* host() const;
+
+        const char* socket() const;
+
+        const char* schema() const;
+
+        void set_schema(const std::string& schema) { _schema = schema; }
+
+        void print(std::ostream& os) const;
+
+    private:
+        void parse(const std::string& str);
+
+        void set_socket(const std::string& name);
+
+        void set_pipe(const std::string& name);
+
+        void set_host(const std::string& host);
+
+        Protocol _protocol;
+        int _port;
+        std::string _host;
+        std::string _schema;
     };
-    
-    Uri(const std::string &str);
 
-    int port() const { return _port; }
-
-    Protocol protocol() const { return _protocol; }
-
-    const char *host() const;
-
-    const char *socket() const;
-
-    const char *schema() const;
-
-    void set_schema(const std::string &schema) { _schema = schema; }
-
-    void print(std::ostream &os) const;
-
-private:
-    void parse(const std::string &str);
-
-    void set_socket(const std::string &name);
-    
-    void set_pipe(const std::string &name);
-    
-    void set_host(const std::string &host);
-    
-    Protocol _protocol;
-    int _port;
-    std::string _host;
-    std::string _schema;
-};
-
-inline std::ostream &operator<<(std::ostream &os, const Uri &uri)
-{
-    return uri.print(os), os;
-}
-
-
-
+    inline std::ostream& operator<<(std::ostream& os, const Uri& uri) {
+        return uri.print(os), os;
+    }
 }
 #endif

@@ -20,128 +20,127 @@
 #define MARIACPP_BIND_HPP
 
 #include <mysql.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 namespace MariaCpp {
 
-struct Time;
+    struct Time;
 
-class Bind
-{
-public:
-    Bind();
+    class Bind {
+    public:
+        Bind();
 
-    ~Bind();
+        ~Bind();
 
-    operator MYSQL_BIND();
-    
-    Bind &init(MYSQL_FIELD *field);
+        operator MYSQL_BIND();
 
-    unsigned long raw_length() const { return _length; }
+        Bind& init(MYSQL_FIELD* field);
 
-    unsigned long data_length() const;
+        unsigned long raw_length() const { return _length; }
 
-    bool error() const { return _error; }
+        unsigned long data_length() const;
 
-    void realloc(unsigned long length);
+        bool error() const { return _error; }
 
-    bool setNull();
-    
-    bool setTinyInt(int8_t value);
+        void realloc(unsigned long length);
 
-    bool setUTinyInt(uint8_t value);
+        bool setNull();
 
-    bool setSmallInt(int16_t value);
+        bool setTinyInt(int8_t value);
 
-    bool setUSmallInt(uint16_t value);
+        bool setUTinyInt(uint8_t value);
 
-    bool setYear(uint16_t value);
+        bool setSmallInt(int16_t value);
 
-    bool setMediumInt(int32_t value);
+        bool setUSmallInt(uint16_t value);
 
-    bool setUMediumInt(uint32_t value);
+        bool setYear(uint16_t value);
 
-    bool setInt(int32_t value);
+        bool setMediumInt(int32_t value);
 
-    bool setUInt(uint32_t value);
+        bool setUMediumInt(uint32_t value);
 
-    bool setBigInt(int64_t value);
+        bool setInt(int32_t value);
 
-    bool setUBigInt(uint64_t value);
+        bool setUInt(uint32_t value);
 
-    // bool setBoolean(bool value) { return setTinyInt(value); }
+        bool setBigInt(int64_t value);
 
-    bool setDouble(double value);
+        bool setUBigInt(uint64_t value);
 
-    bool setFloat(float value);
+        // bool setBoolean(bool value) { return setTinyInt(value); }
 
-    bool setCString(const char *str);
+        bool setDouble(double value);
 
-    bool setString(const std::string &str);
+        bool setFloat(float value);
 
-    bool setBlob(const std::string &str);
-    
-    // bool setBinary(const std::string &str) { return setBlob(str); }
+        bool setCString(const char* str);
 
-    bool setDate(const Time &time)
-        { return setDateTime(time); }
+        bool setString(const std::string& str);
 
-    bool setDateTime(const Time &time);
+        bool setBlob(const std::string& str);
 
-    bool setTime(const Time &time)
-        { return setDateTime(time); }
+        // bool setBinary(const std::string &str) { return setBlob(str); }
 
-    // bool setTimeStamp(const Time &time);
+        bool setDate(const Time& time) { return setDateTime(time); }
 
-    bool isNull() const { return _null; }
+        bool setDateTime(const Time& time);
 
-    std::string getString() const;
+        bool setTime(const Time& time) { return setDateTime(time); }
 
-    int32_t getInt() const;
+        // bool setTimeStamp(const Time &time);
 
-    uint32_t getUInt() const;
+        bool isNull() const { return _null; }
 
-    int64_t getBigInt() const;
+        std::string getString() const;
 
-    uint64_t getUBigInt() const;
+        int32_t getInt() const;
 
-    Time getDateTime() const;
+        uint32_t getUInt() const;
 
-private:
-    template<typename T>
-    inline bool setNumeric(T value, enum_field_types type, bool is_unsigned);
- 
-    inline bool setBuffer(const char *s, size_t length, enum_field_types type);
+        int64_t getBigInt() const;
 
-    inline bool setTime(const Time &time, enum_field_types type);
+        uint64_t getUBigInt() const;
 
-    inline void throw_unsupported_type() const;
+        Time getDateTime() const;
 
-    struct Buffer {
-        typedef bool heap_t;
-        inline void *data(const heap_t &heap) const;
-        inline size_t size(const heap_t &heap) const;
-        inline void *alloc(heap_t &heap, size_t size);
-        inline void free(heap_t &heap);
     private:
-        void *_data;
-        size_t _size;
+        template<typename T>
+        inline bool setNumeric(T value, enum_field_types type, bool is_unsigned);
+
+        inline bool setBuffer(const char* s, size_t length, enum_field_types type);
+
+        inline bool setTime(const Time& time, enum_field_types type);
+
+        static inline void throw_unsupported_type() ;
+
+        struct Buffer {
+            typedef bool heap_t;
+
+            inline void* data(const heap_t& heap) const;
+
+            inline size_t size(const heap_t& heap) const;
+
+            inline void* alloc(heap_t& heap, size_t size);
+
+            inline void free(heap_t& heap);
+
+        private:
+            void* _data;
+            size_t _size;
+        };
+
+        Bind(const Bind&); // non-copyable
+        const Bind& operator=(const Bind&); // non-copyable
+
+        Buffer _buffer;
+        unsigned long _length; // Might be bigger than buffer after fetch()!
+        enum_field_types _type;
+        my_bool _null;
+        my_bool _unsigned;
+        my_bool _error;
+        Buffer::heap_t _heap;
     };
-    
-    Bind(const Bind &); // non-copyable
-    const Bind &operator=(const Bind &); // non-copyable
-
-    Buffer _buffer;
-    unsigned long _length; // Might be bigger than buffer after fetch()!
-    enum_field_types _type;
-    my_bool _null;
-    my_bool _unsigned;
-    my_bool _error;
-    Buffer::heap_t _heap;
-};
-
-
-
 }
 #endif

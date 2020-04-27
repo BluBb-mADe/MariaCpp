@@ -4,43 +4,43 @@
 #
 # Try to find the include directory
 
-# IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-#   SET(PFILES $ENV{ProgramW6432})   
-# ELSE()
-#   SET(PFILES $ENV{ProgramFiles})   
-# ENDIF()
+IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  SET(PFILES $ENV{ProgramW6432})
+ELSE()
+  SET(PFILES $ENV{ProgramFiles})
+ENDIF()
 
 
-# FIND_PATH(MARIADB_INCLUDE_DIR mysql.h
-#     $ENV{MARIADB_INCLUDE_DIR}
-#     $ENV{MARIADB_DIR}/include
-#     $ENV{MARIADB_DIR}/include/mariadb
-#     ${PFILES}/MariaDB/*/include)
+FIND_PATH(MARIADB_INCLUDE_DIR mysql.h
+    $ENV{MARIADB_INCLUDE_DIR}
+    $ENV{MARIADB_DIR}/include
+    $ENV{MARIADB_DIR}/include/mariadb
+    ${PFILES}/MariaDB/*/include)
 
-# IF(MARIADB_INCLUDE_DIR)
-#   MESSAGE(STATUS "Found MariaDB includes: ${MARIADB_INCLUDE_DIR}")
-# ENDIF()
+IF(MARIADB_INCLUDE_DIR)
+  MESSAGE(STATUS "Found MariaDB includes: ${MARIADB_INCLUDE_DIR}")
+ENDIF()
 
-# IF(WIN32)
-#   SET (LIB_NAME mariadbclient.lib)
+IF(WIN32)
+  SET (LIB_NAME mariadbclient.lib)
 
-# # Try to find mariadb client libraries
-#   FIND_PATH(MARIADB_LIBRARY_DIR ${LIB_NAME}
-#       $ENV{MARIADB_LIBRARY}
-#       ${PFILES}/MariaDB/*/lib
-#       $ENV{MARIADB_DIR}/lib/mariadb
-#       $ENV{MARIADB_DIR}/lib
-#       $ENV{MARIADB_DIR}/libmariadb)
+# Try to find mariadb client libraries
+  FIND_PATH(MARIADB_LIBRARY_DIR ${LIB_NAME}
+      $ENV{MARIADB_LIBRARY}
+      ${PFILES}/MariaDB/*/lib
+      $ENV{MARIADB_DIR}/lib/mariadb
+      $ENV{MARIADB_DIR}/lib
+      $ENV{MARIADB_DIR}/libmariadb)
 
-#   IF(MARIADB_LIBRARY)
-#     GET_FILENAME_COMPONENT(MARIADB_LIBRARY_DIR ${MARIADB_LIBRARY} PATH)
-#   ENDIF()
+  IF(MARIADB_LIBRARY)
+    GET_FILENAME_COMPONENT(MARIADB_LIBRARY_DIR ${MARIADB_LIBRARY} PATH)
+  ENDIF()
 
-# ELSE()
-  # SET(MARIADB_LIB libmariadbclient.a)
-  # FIND_PATH(MARIADB_CONFIG_DIR mariadb_config
-  #   $ENV{MARIADB_DIR}/bin
-  #   ${MARIADB_DIR}/bin)
+ELSE()
+  SET(MARIADB_LIB libmariadbclient.a)
+  FIND_PATH(MARIADB_CONFIG_DIR mariadb_config
+    $ENV{MARIADB_DIR}/bin
+    ${MARIADB_DIR}/bin)
   FIND_PROGRAM(MARIADB_CONFIG mariadb_config
     PATHS
     $ENV{MARIADB_DIR}/bin
@@ -64,7 +64,7 @@
     STRING(SUBSTRING ${MARIADB_LIBRARY_DIR} 0 ${MY_LENGTH} MARIADB_LIBRARY_DIR)
     # ADD_DEFINITIONS(${MARIADB_INCLUDE_DIR})
   ENDIF()
-# ENDIF()
+ENDIF()
 
 IF(MARIADB_LIBRARY_DIR AND MARIADB_INCLUDE_DIR)
   MESSAGE(STATUS "MariaDB version: ${MARIADB_VERSION}")
