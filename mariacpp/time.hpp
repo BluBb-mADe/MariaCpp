@@ -22,8 +22,18 @@
 #include <mysql.h>
 #include <iosfwd>
 #include <string>
+#include <chrono>
+
+namespace std {
+namespace chrono {
+    typedef duration<uint32_t, std::ratio<86400>> days;
+    typedef duration<uint32_t, std::ratio<604800>> weeks;
+    typedef duration<uint32_t, std::ratio<2629746>> months;
+    typedef duration<uint32_t, std::ratio<31556952>> years;
+}}
 
 namespace MariaCpp {
+    using namespace std::chrono;
 
     struct Time : public MYSQL_TIME {
         typedef unsigned year_t;
@@ -44,6 +54,26 @@ namespace MariaCpp {
         static Time time(hour_t hour, minute_t minute, second_t second);
 
         static Time datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second);
+
+        template<typename T>
+        static Time datetime(std::chrono::time_point<T> tp) {
+            MYSQL_TIME t;
+            auto du = tp.time_since_epoch();
+            t.year = duration_cast<std::chrono::years>(du).count();
+            du -= years(t.year);
+            t.month = duration_cast<months>(du).count();
+            du -= months(t.month);
+            t.day = duration_cast<days>(du).count();
+            du -= days(t.day);
+            t.hour = duration_cast<hours>(du).count();
+            du -= hours(t.hour);
+            t.minute = duration_cast<minutes>(du).count();
+            du -= minutes(t.minute);
+            t.second = duration_cast<seconds>(du).count();
+            du -= seconds(t.second);
+            t.second_part = duration_cast<milliseconds>(du).count();
+            return t;
+        }
 
         void print(std::ostream& os) const;
     };
