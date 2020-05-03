@@ -69,7 +69,7 @@ namespace MariaCpp {
 
         bool setUBigInt(uint64_t value);
 
-        // bool setBoolean(bool value) { return setTinyInt(value); }
+        bool setBoolean(bool value) { return setTinyInt(value); }
 
         bool setDouble(double value);
 
@@ -80,8 +80,6 @@ namespace MariaCpp {
         bool setString(const std::string& str);
 
         bool setBlob(const std::string& str);
-
-        // bool setBinary(const std::string &str) { return setBlob(str); }
 
         bool setDate(const Time& time) { return setDateTime(time); }
 

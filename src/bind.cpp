@@ -277,14 +277,6 @@ namespace MariaCpp {
     }
 
 
-// MYSQL_TYPE_TIMESTAMP is identical to MYSQL_TYPE_DATETIME;
-// bool
-// Bind::setTimeStamp(const Time &time)
-// {
-//     return setTime(time, MYSQL_TYPE_TIMESTAMP);
-// }
-
-
     int32_t Bind::getInt() const {
         return static_cast<int32_t>(getBigInt());
     }
