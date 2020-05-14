@@ -87,7 +87,7 @@ namespace MariaCpp {
 
         bool setTime(const Time& time) { return setDateTime(time); }
 
-        // bool setTimeStamp(const Time &time);
+        bool setTimeStamp(const uint64_t time) { return setUBigInt(time); }
 
         bool isNull() const { return _null; }
 

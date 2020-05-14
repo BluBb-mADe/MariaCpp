@@ -188,13 +188,13 @@ namespace MariaCpp {
     ResultSet* Connection::store_result() {
         MYSQL_RES* res = mysql_store_result(&mysql);
         if (!res && errorno()) throw_exception();
-        return res ? new ResultSet(*this, res) : 0;
+        return res ? new ResultSet(*this, res) : nullptr;
     }
 
     ResultSet* Connection::use_result() {
         MYSQL_RES* res = mysql_use_result(&mysql);
         if (!res && errorno()) throw_exception();
-        return res ? new ResultSet(*this, res) : 0;
+        return res ? new ResultSet(*this, res) : nullptr;
     }
 
     void Connection::throw_exception() {
