@@ -292,6 +292,14 @@ namespace MariaCpp {
         return result(col).getUBigInt();
     }
 
+    float PreparedStatement::getFloat(idx_t col) const {
+        return result(col).getFloat();
+    }
+
+    double PreparedStatement::getDouble(idx_t col) const {
+        return result(col).getDouble();
+    }
+
     Time PreparedStatement::getDate(idx_t col) const {
         return getDateTime(col);
     }

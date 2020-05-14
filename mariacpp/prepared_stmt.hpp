@@ -182,6 +182,10 @@ namespace MariaCpp {
 
         uint64_t getUBigInt(idx_t col) const;
 
+        float getFloat(idx_t col) const;
+
+        double getDouble(idx_t col) const;
+
         Time getDate(idx_t col) const; // same as getDateTime(col)
 
         Time getDateTime(idx_t col) const;

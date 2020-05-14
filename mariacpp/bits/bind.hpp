@@ -101,6 +101,10 @@ namespace MariaCpp {
 
         uint64_t getUBigInt() const;
 
+        float getFloat() const;
+
+        double getDouble() const;
+
         Time getDateTime() const;
 
     private:

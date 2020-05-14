@@ -25,6 +25,7 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <charconv>
 #include <algorithm>
 
 namespace MariaCpp {
@@ -422,6 +423,94 @@ namespace MariaCpp {
             case MYSQL_TYPE_TIME:
             case MYSQL_TYPE_DATETIME:
                 return 0; // TODO: convert DATE/TIME to int
+            default:
+                throw_unsupported_type();
+        }
+        return 0;
+    }
+
+    float Bind::getFloat() const {
+        const char* data = reinterpret_cast<char*>(_buffer.data(_heap));
+        if (_null || !data) return 0;
+        switch (_type) {
+            case MYSQL_TYPE_NULL:
+                return 0;
+            case MYSQL_TYPE_DECIMAL:
+            case MYSQL_TYPE_NEWDECIMAL:
+            case MYSQL_TYPE_TINY_BLOB:
+            case MYSQL_TYPE_MEDIUM_BLOB:
+            case MYSQL_TYPE_LONG_BLOB:
+            case MYSQL_TYPE_BLOB:
+            case MYSQL_TYPE_VAR_STRING:
+            case MYSQL_TYPE_STRING:
+            case MYSQL_TYPE_VARCHAR:
+            case MYSQL_TYPE_BIT:
+            case MYSQL_TYPE_ENUM:
+            case MYSQL_TYPE_SET:
+            case MYSQL_TYPE_NEWDATE:
+            case MYSQL_TYPE_GEOMETRY: {
+                float res = 0;
+                std::from_chars(data, data + data_length(), res);
+                return res;
+            }
+            case MYSQL_TYPE_TINY:
+                return static_cast<float>(*reinterpret_cast<const int8_t*>(data));
+            case MYSQL_TYPE_SHORT:
+            case MYSQL_TYPE_YEAR:
+                return static_cast<float>(*reinterpret_cast<const int16_t*>(data));
+            case MYSQL_TYPE_LONG:
+            case MYSQL_TYPE_INT24:
+                return static_cast<float>(*reinterpret_cast<const int32_t*>(data));
+            case MYSQL_TYPE_LONGLONG:
+                return static_cast<float>(*reinterpret_cast<const int64_t*>(data));
+            case MYSQL_TYPE_FLOAT:
+                return *reinterpret_cast<const float*>(data);
+            case MYSQL_TYPE_DOUBLE:
+                return static_cast<float>(*reinterpret_cast<const double*>(data));
+            default:
+                throw_unsupported_type();
+        }
+        return 0;
+    }
+
+    double Bind::getDouble() const {
+        const char* data = reinterpret_cast<char*>(_buffer.data(_heap));
+        if (_null || !data) return 0;
+        switch (_type) {
+            case MYSQL_TYPE_NULL:
+                return 0;
+            case MYSQL_TYPE_DECIMAL:
+            case MYSQL_TYPE_NEWDECIMAL:
+            case MYSQL_TYPE_TINY_BLOB:
+            case MYSQL_TYPE_MEDIUM_BLOB:
+            case MYSQL_TYPE_LONG_BLOB:
+            case MYSQL_TYPE_BLOB:
+            case MYSQL_TYPE_VAR_STRING:
+            case MYSQL_TYPE_STRING:
+            case MYSQL_TYPE_VARCHAR:
+            case MYSQL_TYPE_BIT:
+            case MYSQL_TYPE_ENUM:
+            case MYSQL_TYPE_SET:
+            case MYSQL_TYPE_NEWDATE:
+            case MYSQL_TYPE_GEOMETRY: {
+                double res = 0;
+                std::from_chars(data, data + data_length(), res);
+                return res;
+            }
+            case MYSQL_TYPE_TINY:
+                return static_cast<double>(*reinterpret_cast<const int8_t*>(data));
+            case MYSQL_TYPE_SHORT:
+            case MYSQL_TYPE_YEAR:
+                return static_cast<double>(*reinterpret_cast<const int16_t*>(data));
+            case MYSQL_TYPE_LONG:
+            case MYSQL_TYPE_INT24:
+                return static_cast<double>(*reinterpret_cast<const int32_t*>(data));
+            case MYSQL_TYPE_LONGLONG:
+                return static_cast<double>(*reinterpret_cast<const int64_t*>(data));
+            case MYSQL_TYPE_FLOAT:
+                return static_cast<double>(*reinterpret_cast<const float*>(data));
+            case MYSQL_TYPE_DOUBLE:
+                return *reinterpret_cast<const double*>(data);
             default:
                 throw_unsupported_type();
         }
