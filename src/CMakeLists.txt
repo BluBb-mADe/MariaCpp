@@ -21,6 +21,13 @@ FILE(GLOB SRC *.cpp *.c)
 INCLUDE_DIRECTORIES(${MARIADB_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
 ADD_LIBRARY(mariacpp STATIC ${SRC})
 
+# windows clang-cl support
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    target_compile_options(mariacpp PUBLIC /EHa /Zc:__cplusplus /MTd -m64)
+    add_link_options(/MTd)
+    add_compile_definitions(WIN32)
+endif()
+
 INSTALL(TARGETS mariacpp
   RUNTIME DESTINATION lib
   LIBRARY DESTINATION lib
