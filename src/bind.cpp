@@ -25,8 +25,31 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
-#include <charconv>
 #include <algorithm>
+
+#if __cplusplus > 201611L
+#include <charconv>
+template<typename T>
+constexpr void from_chars(const char* first, const char* last, T& out) {
+    std::from_chars(first, last, out);
+}
+#else
+template<typename T>
+void from_chars(const char* first, const char* last, T& out) {
+    if (std::is_same<T, int64_t>::value) {
+        out = strtoll(std::string(first, last - first).c_str(), nullptr, 10);
+    }
+    else if (std::is_same<T, uint64_t>::value) {
+        out = strtoull(std::string(first, last - first).c_str(), nullptr, 10);
+    }
+    else if (std::is_same<T, float>::value) {
+        out = stof(std::string(first, last - first), nullptr);
+    }
+    else { // if constexpr (std::is_same<T, double>::value)
+        out = stod(std::string(first, last - first), nullptr);
+    }
+}
+#endif
 
 namespace MariaCpp {
 
@@ -355,8 +378,11 @@ namespace MariaCpp {
             case MYSQL_TYPE_ENUM:
             case MYSQL_TYPE_SET:
             case MYSQL_TYPE_NEWDATE:
-            case MYSQL_TYPE_GEOMETRY:
-                return strtoll(std::string(data, data_length()).c_str(), NULL, 10);
+            case MYSQL_TYPE_GEOMETRY: {
+                int64_t res = 0;
+                from_chars(data, data + data_length(), res);
+                return res;
+            }
             case MYSQL_TYPE_TINY:
                 return *reinterpret_cast<const int8_t*>(data);
             case MYSQL_TYPE_SHORT:
@@ -402,8 +428,11 @@ namespace MariaCpp {
             case MYSQL_TYPE_ENUM:
             case MYSQL_TYPE_SET:
             case MYSQL_TYPE_NEWDATE:
-            case MYSQL_TYPE_GEOMETRY:
-                return strtoull(std::string(data, data_length()).c_str(), NULL, 10);
+            case MYSQL_TYPE_GEOMETRY: {
+                uint64_t res = 0;
+                from_chars(data, data + data_length(), res);
+                return res;
+            }
             case MYSQL_TYPE_TINY:
                 return *reinterpret_cast<const uint8_t*>(data);
             case MYSQL_TYPE_SHORT:
@@ -450,7 +479,7 @@ namespace MariaCpp {
             case MYSQL_TYPE_NEWDATE:
             case MYSQL_TYPE_GEOMETRY: {
                 float res = 0;
-                std::from_chars(data, data + data_length(), res);
+                from_chars(data, data + data_length(), res);
                 return res;
             }
             case MYSQL_TYPE_TINY:
@@ -494,7 +523,7 @@ namespace MariaCpp {
             case MYSQL_TYPE_NEWDATE:
             case MYSQL_TYPE_GEOMETRY: {
                 double res = 0;
-                std::from_chars(data, data + data_length(), res);
+                from_chars(data, data + data_length(), res);
                 return res;
             }
             case MYSQL_TYPE_TINY:
