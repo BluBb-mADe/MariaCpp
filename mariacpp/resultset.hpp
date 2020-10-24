@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <cassert>
 #include <string>
+#include <vector>
 
 namespace MariaCpp {
 
@@ -98,6 +99,24 @@ namespace MariaCpp {
 
         double getDouble(unsigned col) const;
 
+        void fetchFieldNames();
+
+        std::string getString(const std::string& col) const;
+
+        std::string getBinary(const std::string& col) const { return getString(col); }
+
+        int32_t getInt(const std::string& col) const;
+
+        int64_t getInt64(const std::string& col) const;
+
+        uint32_t getUInt(const std::string& col) const;
+
+        uint64_t getUInt64(const std::string& col) const;
+
+        bool getBoolean(const std::string& col) const { return getInt(col); }
+
+        double getDouble(const std::string& col) const;
+
         bool isNull(unsigned col) const {
             assert_col(col);
             return !_row[col];
@@ -138,6 +157,9 @@ namespace MariaCpp {
         MYSQL_RES* _res;
         MYSQL_ROW _row; // _row == _res->current_row
         mutable unsigned long* _lengths; // == fetch_lengths()
+        std::vector<std::string> _col_names;
+
+        int getFieldIndexByName(const std::string& name) const;
     };
 
     void ResultSet::assert_col(unsigned col) const {

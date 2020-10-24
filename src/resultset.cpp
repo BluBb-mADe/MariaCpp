@@ -18,6 +18,7 @@
 *****************************************************************************/
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/connection.hpp>
+#include <mariacpp/mariadb_error.hpp>
 #include <cstdlib>
 
 namespace MariaCpp {
@@ -95,7 +96,7 @@ namespace MariaCpp {
 
     MYSQL_ROW ResultSet::fetch_row_start() {
         assert(!_conn._async_status);
-        _lengths = 0;
+        _lengths = nullptr;
         _conn._async_status = mysql_fetch_row_start(&_row, _res);
         if (_conn._async_status) return nullptr;
         if (!_row && _conn.errorno()) _conn.throw_exception();
@@ -110,5 +111,44 @@ namespace MariaCpp {
         return _row;
     }
 
+    void ResultSet::fetchFieldNames() {
+        _col_names.resize(_res->field_count);
+        for (int i = 0; i < _res->field_count; ++i) {
+            auto* field = fetch_field();
+            _col_names[i] = std::string(field->name, field->name_length);
+        }
+    }
+
+    std::string ResultSet::getString(const std::string& col) const {
+        return getString(getFieldIndexByName(col));
+    }
+
+    int32_t ResultSet::getInt(const std::string& col) const {
+        return getInt(getFieldIndexByName(col));
+    }
+
+    int64_t ResultSet::getInt64(const std::string& col) const {
+        return getInt64(getFieldIndexByName(col));
+    }
+
+    uint32_t ResultSet::getUInt(const std::string& col) const {
+        return getUInt(getFieldIndexByName(col));
+    }
+
+    uint64_t ResultSet::getUInt64(const std::string& col) const {
+        return getUInt64(getFieldIndexByName(col));
+    }
+
+    double ResultSet::getDouble(const std::string& col) const {
+        return getDouble(getFieldIndexByName(col));
+    }
+
+    int ResultSet::getFieldIndexByName(const std::string& name) const {
+        for (int i = 0; i < _col_names.size(); ++i) {
+            if (name == _col_names[i])
+                return i;
+        }
+        throw mariadb_error("unknown column name \"" + name + "\", did you forget to call \"fetchFieldNames()\"?");
+    }
 #endif /* MARIADB_VERSION_ID */
 }
