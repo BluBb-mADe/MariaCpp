@@ -20,11 +20,12 @@
 #include <mariacpp/connection.hpp>
 #include <mariacpp/mariadb_error.hpp>
 #include <cstdlib>
+#include <algorithm>
 
 namespace MariaCpp {
 
     MYSQL_ROW ResultSet::fetch_row() {
-        _lengths = 0;
+        _lengths = nullptr;
         _row = mysql_fetch_row(_res);
         if (!_row && _conn.errorno()) _conn.throw_exception();
         return _row;
@@ -153,9 +154,16 @@ namespace MariaCpp {
         return getDouble(getFieldIndexByName(col));
     }
 
+    static bool lc_equals(const std::string& a, const std::string& b) {
+        return a.size() == b.size() && std::ranges::equal(a, b,
+                  [](const char c, const char d) {
+                      return tolower(c) == tolower(d);
+                  });
+    }
+
     int ResultSet::getFieldIndexByName(const std::string& name) const {
         for (int i = 0; i < _col_names.size(); ++i) {
-            if (name == _col_names[i])
+            if (lc_equals(name, _col_names[i]))
                 return i;
         }
         throw mariadb_error("unknown column name \"" + name + "\", did you forget to call \"fetchFieldNames()\"?");
