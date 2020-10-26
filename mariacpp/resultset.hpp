@@ -83,19 +83,26 @@ namespace MariaCpp {
             return _row[col];
         }
 
+        bool isNull(unsigned col) const {
+            assert_col(col);
+            return !_row[col];
+        }
+
         std::string getString(unsigned col) const;
 
         std::string getBinary(unsigned col) const { return getString(col); }
 
         int32_t getInt(unsigned col) const;
 
-        int64_t getInt64(unsigned col) const;
-
         uint32_t getUInt(unsigned col) const;
+
+        int64_t getInt64(unsigned col) const;
 
         uint64_t getUInt64(unsigned col) const;
 
         bool getBoolean(unsigned col) const { return getInt(col); }
+
+        float getFloat(unsigned col) const;
 
         double getDouble(unsigned col) const;
 
@@ -107,20 +114,17 @@ namespace MariaCpp {
 
         int32_t getInt(const std::string& col) const;
 
-        int64_t getInt64(const std::string& col) const;
-
         uint32_t getUInt(const std::string& col) const;
+
+        int64_t getInt64(const std::string& col) const;
 
         uint64_t getUInt64(const std::string& col) const;
 
         bool getBoolean(const std::string& col) const { return getInt(col); }
 
-        double getDouble(const std::string& col) const;
+        float getFloat(const std::string& col) const;
 
-        bool isNull(unsigned col) const {
-            assert_col(col);
-            return !_row[col];
-        }
+        double getDouble(const std::string& col) const;
 
         unsigned long length(unsigned col) const {
             assert_col(col);

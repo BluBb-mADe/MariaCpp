@@ -182,6 +182,8 @@ namespace MariaCpp {
 
         uint64_t getUBigInt(idx_t col) const;
 
+        bool getBoolean(unsigned col) const { return getInt(col); }
+
         float getFloat(idx_t col) const;
 
         double getDouble(idx_t col) const;

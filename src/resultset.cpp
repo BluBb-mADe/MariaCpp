@@ -70,6 +70,12 @@ namespace MariaCpp {
         return strtoll(_row[col], NULL, 10);
     }
 
+    float ResultSet::getFloat(unsigned col) const {
+        assert_col(col);
+        if (isNull(col)) return 0;
+        return strtof(_row[col], NULL);
+    }
+
     double ResultSet::getDouble(unsigned col) const {
         assert_col(col);
         if (isNull(col)) return 0;
@@ -137,6 +143,10 @@ namespace MariaCpp {
 
     uint64_t ResultSet::getUInt64(const std::string& col) const {
         return getUInt64(getFieldIndexByName(col));
+    }
+
+    float ResultSet::getFloat(const std::string& col) const {
+        return getFloat(getFieldIndexByName(col));
     }
 
     double ResultSet::getDouble(const std::string& col) const {
