@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #if __cplusplus < 201103L
 # define unique_ptr auto_ptr
@@ -122,8 +123,12 @@ namespace MariaCpp {
         if (count && rs.get()) {
             _results = new Bind[count]();
             std::vector<MYSQL_BIND> par(count);
-            for (unsigned i = 0; i < count; ++i)
-                par[i] = _results[i].init(rs->fetch_field_direct(i));
+            _col_names.resize(count);
+            for (unsigned i = 0; i < count; ++i) {
+                auto field = rs->fetch_field_direct(i);
+                _col_names[i] = std::string(field->name, field->name_length);
+                par[i] = _results[i].init(field);
+            }
             bind_result(&par[0]);
         }
     }
@@ -314,6 +319,65 @@ namespace MariaCpp {
 
     Time PreparedStatement::getTimeStamp(idx_t col) const {
         return getDateTime(col);
+    }
+
+    std::string PreparedStatement::getString(const std::string& col) const {
+        return getString(getFieldIndexByName(col));
+    }
+
+    int32_t PreparedStatement::getInt(const std::string& col) const {
+        return getInt(getFieldIndexByName(col));
+    }
+
+    uint32_t PreparedStatement::getUInt(const std::string& col) const {
+        return getUInt(getFieldIndexByName(col));
+    }
+
+    int64_t PreparedStatement::getBigInt(const std::string& col) const {
+        return getBigInt(getFieldIndexByName(col));
+    }
+
+    uint64_t PreparedStatement::getUBigInt(const std::string& col) const {
+        return getUBigInt(getFieldIndexByName(col));
+    }
+
+    float PreparedStatement::getFloat(const std::string& col) const {
+        return getFloat(getFieldIndexByName(col));
+    }
+
+    double PreparedStatement::getDouble(const std::string& col) const {
+        return getDouble(getFieldIndexByName(col));
+    }
+
+    Time PreparedStatement::getDate(const std::string& col) const {
+        return getDate(getFieldIndexByName(col));
+    }
+
+    Time PreparedStatement::getDateTime(const std::string& col) const {
+        return getDateTime(getFieldIndexByName(col));
+    }
+
+    Time PreparedStatement::getTime(const std::string& col) const {
+        return getTime(getFieldIndexByName(col));
+    }
+
+    Time PreparedStatement::getTimeStamp(const std::string& col) const {
+        return getTimeStamp(getFieldIndexByName(col));
+    }
+
+    static bool lc_equals(const std::string& a, const std::string& b) {
+        return a.size() == b.size() && std::ranges::equal(a, b,
+                  [](const char c, const char d) {
+                      return tolower(c) == tolower(d);
+                  });
+    }
+
+    int PreparedStatement::getFieldIndexByName(const std::string& name) const {
+        for (int i = 0; i < _col_names.size(); ++i) {
+            if (lc_equals(name, _col_names[i]))
+                return i;
+        }
+        throw mariadb_error("unknown column name \"" + name + "\".");
     }
 
 #ifdef MARIADB_VERSION_ID

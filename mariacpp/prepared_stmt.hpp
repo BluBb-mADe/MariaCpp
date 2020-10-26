@@ -22,6 +22,7 @@
 #include <mysql.h>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace MariaCpp {
 
@@ -196,6 +197,34 @@ namespace MariaCpp {
 
         Time getTimeStamp(idx_t col) const; // same as getDateTime(col)
 
+        std::string getString(const std::string& col) const;
+
+        std::string getBinary(const std::string& col) const { return getString(col); }
+
+        int32_t getInt(const std::string& col) const;
+
+        uint32_t getUInt(const std::string& col) const;
+
+        int64_t getBigInt(const std::string& col) const;
+
+        uint64_t getUBigInt(const std::string& col) const;
+
+        bool getBoolean(const std::string& col) const { return getInt(col); }
+
+        float getFloat(const std::string& col) const;
+
+        double getDouble(const std::string& col) const;
+
+        Time getDate(const std::string& col) const; // same as getDateTime(col)
+
+        Time getDateTime(const std::string& col) const;
+
+        Time getTime(const std::string& col) const; // same as getDateTime(col)
+
+        Time getTimeStamp(const std::string& col) const; // same as getDateTime(col)
+
+        int getFieldIndexByName(const std::string& name) const;
+
 #   ifdef MARIADB_VERSION_ID
 
         int async_status() const;
@@ -273,6 +302,7 @@ namespace MariaCpp {
         bool _truncated;
         bool _bind_params; // C++ style binding
         bool _bind_results;
+        std::vector<std::string> _col_names;
     };
 }
 #endif
