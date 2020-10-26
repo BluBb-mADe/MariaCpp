@@ -17,8 +17,11 @@
 #  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 # ****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.9)
 PROJECT(mariacpp)
+SET(CMAKE_CXX_STANDARD 20)
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v")
 
 SET(CPACK_PACKAGE_VERSION_MAJOR 1)
 SET(CPACK_PACKAGE_VERSION_MINOR 0)
@@ -32,6 +35,13 @@ find_package(Threads REQUIRED)
 if (CMAKE_USE_PTHREADS_INIT)
   set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-pthread")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT result OUTPUT output)
+if(result AND CMAKE_BUILD_TYPE STREQUAL "Release")
+  MESSAGE("-- lto enabled")
+  set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 enable_testing()
