@@ -22,6 +22,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <iosfwd>
+#include <cstring>
 
 #include <mysql.h>
 
@@ -29,7 +30,7 @@ namespace MariaCpp {
     class mariadb_error : public std::runtime_error {
     public:
         mariadb_error(const char* str, unsigned number, const char* sqlstate) : std::runtime_error(str), errno_(number) {
-            memcpy(sqlstate_, sqlstate, sqlstate_length_);
+            std::memcpy(sqlstate_, sqlstate, sqlstate_length_);
             sqlstate_[sqlstate_length_] = '\0';
         }
 

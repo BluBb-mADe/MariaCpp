@@ -23,10 +23,20 @@ SET(CMAKE_CXX_STANDARD 20)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v")
 
-find_library(MariaDBClient_LIBRARY
-  NAMES mariadbclient
-  REQUIRED
-  )
+find_path(MARIADB_INCLUDE_DIR
+    mysql.h
+    PATHS "${MARIADB_PATH}"
+    PATH_SUFFIXES mariadb include
+    REQUIRED)
+
+MESSAGE("-- Found mariadb include: ${MARIADB_INCLUDE_DIR}")
+
+find_library(MARIADB_LIBRARY
+    NAMES libmariadb mariadb
+    PATHS "${MARIADB_PATH}"
+    REQUIRED)
+
+MESSAGE("-- Found mariadb library: ${MARIADB_LIBRARY}")
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads REQUIRED)

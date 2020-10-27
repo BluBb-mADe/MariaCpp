@@ -21,13 +21,23 @@
 *****************************************************************************/
 #include <mysql.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #ifndef SEC_PART_DIGITS
 #define SEC_PART_DIGITS 6
 #endif
-
+#ifndef WIN32
+int sscanf_s(char const* const buffer, char const* const format, ...) {
+    int ret;
+    va_list argp;
+    va_start(argp, format);
+    ret = vsscanf(buffer, format, argp);
+    va_end(argp);
+    return ret;
+}
+#endif
 size_t mariacpp_time_to_string(const MYSQL_TIME* tm, char* time_str, size_t len) {
     size_t length;
 

@@ -25,33 +25,38 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
-#include <algorithm>
 
-#if __cplusplus > 201611L
 #include <charconv>
 template<typename T>
 constexpr T from_chars(const char* first, const char* last) {
-    T out;
-    std::from_chars(first, last, out);
-    return out;
-}
-#else
-template<typename T>
-T from_chars(const char* first, const char* last) {
-    if (std::is_same<T, int64_t>::value) {
+    constexpr bool can_charconv = requires(T t) {
+        std::from_chars(first, last, t);
+    };
+    if constexpr (can_charconv) {
+        T out;
+        std::from_chars(first, last, out);
+        return out;
+    }
+    else if constexpr (std::is_same<T, int32_t>::value) {
+        return strtol(std::string(first, last - first).c_str(), nullptr, 10);
+    }
+    else if constexpr (std::is_same<T, uint32_t>::value) {
+        return strtoul(std::string(first, last - first).c_str(), nullptr, 10);
+    }
+    else if constexpr (std::is_same<T, int64_t>::value) {
         return strtoll(std::string(first, last - first).c_str(), nullptr, 10);
     }
-    else if (std::is_same<T, uint64_t>::value) {
+    else if constexpr (std::is_same<T, uint64_t>::value) {
         return strtoull(std::string(first, last - first).c_str(), nullptr, 10);
     }
-    else if (std::is_same<T, float>::value) {
+    else if constexpr (std::is_same<T, float>::value) {
         return stof(std::string(first, last - first), nullptr);
     }
-    else { // if constexpr (std::is_same<T, double>::value)
+    else if constexpr (std::is_same<T, double>::value) {
         return stod(std::string(first, last - first), nullptr);
     }
+    return {};
 }
-#endif
 
 namespace MariaCpp {
 

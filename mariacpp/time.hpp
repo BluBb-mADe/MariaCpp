@@ -24,6 +24,7 @@
 #include <string>
 #include <chrono>
 
+#ifndef __cpp_lib_chrono
 namespace std {
 namespace chrono {
     typedef duration<uint32_t, std::ratio<86400>> days;
@@ -31,6 +32,7 @@ namespace chrono {
     typedef duration<uint32_t, std::ratio<2629746>> months;
     typedef duration<uint32_t, std::ratio<31556952>> years;
 }}
+#endif
 
 namespace MariaCpp {
     using namespace std::chrono;

@@ -37,20 +37,23 @@ SET(TMP "TEST_DB_URI=${TEST_DB_URI}")
 SET(TMP "${TMP};TEST_DB_USER=${TEST_DB_USER}")
 SET(TMP "${TMP};TEST_DB_PASSWD=${TEST_DB_PASSWD}")
 SET_TESTS_PROPERTIES(
-  Connect MultiThreads SimpleQuery PrepStmt-C PrepStmt-C++ Example
-  PROPERTIES ENVIRONMENT "${TMP}")
+    Connect MultiThreads SimpleQuery PrepStmt-C PrepStmt-C++ Example
+    PROPERTIES ENVIRONMENT "${TMP}")
 
 link_libraries(
-  mariacpp
-  ws2_32
-  "${MARIADB_LIBRARY_DIR}/libmariadb.lib")
+    mariacpp
+    "${MARIADB_LIBRARY}")
+if (WIN32)
+  link_libraries(ws2_32)
+endif()
+
 include_directories(
-  ${MARIADB_INCLUDE_DIR}
-  ${CMAKE_SOURCE_DIR})
+    ${MARIADB_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR})
 
 add_executable(connect connect.cpp)
 if(CMAKE_USE_PTHREADS_INIT)
-    add_executable(threads threads.cpp)
+  add_executable(threads threads.cpp)
 endif()
 add_executable(query query.cpp)
 add_executable(prepstmtc prepstmtc.cpp)
