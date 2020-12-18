@@ -21,7 +21,6 @@
 *****************************************************************************/
 #include <mysql.h>
 #include <stdio.h>
-#include <stdarg.h>
 #include <string.h>
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
