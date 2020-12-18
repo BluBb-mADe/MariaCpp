@@ -124,10 +124,10 @@ namespace MariaCpp {
             _results = new Bind[count]();
             std::vector<MYSQL_BIND> par(count);
             _col_names.resize(count);
+            auto* fields = rs->fetch_fields();
             for (unsigned i = 0; i < count; ++i) {
-                auto field = rs->fetch_field_direct(i);
-                _col_names[i] = std::string(field->name, field->name_length);
-                par[i] = _results[i].init(field);
+                _col_names[i] = std::string(fields[i].name, fields[i].name_length);
+                par[i] = _results[i].init(&fields[i]);
             }
             bind_result(&par[0]);
         }
