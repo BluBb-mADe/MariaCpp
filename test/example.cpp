@@ -27,10 +27,6 @@
 #include <iostream>
 #include <memory>
 
-#if __cplusplus < 201103L
-# define unique_ptr auto_ptr
-#endif
-
 using namespace MariaCpp;
 
 const char* uri = "tcp://localhost:3306/test";

@@ -26,10 +26,6 @@
 #include <iostream>
 #include <memory>
 
-#if __cplusplus < 201103L
-# define unique_ptr auto_ptr
-#endif
-
 int test(const char* uri, const char* user, const char* passwd) {
     std::clog << "DB uri: " << uri << std::endl;
     std::clog << "DB user: " << user << std::endl;

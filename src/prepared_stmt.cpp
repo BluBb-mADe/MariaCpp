@@ -27,10 +27,6 @@
 #include <vector>
 #include <algorithm>
 
-#if __cplusplus < 201103L
-# define unique_ptr auto_ptr
-#endif
-
 namespace MariaCpp {
 
     PreparedStatement::PreparedStatement(Connection& conn) : _conn(conn), _stmt(conn.stmt_init()), _params(), _results(), _truncated(),

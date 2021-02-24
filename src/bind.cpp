@@ -30,15 +30,12 @@
 
 template<typename T>
 constexpr T from_chars(const char* first, const char* last) {
-    constexpr bool can_charconv = requires(T t) {
-        std::from_chars(first, last, t);
-    };
-    if constexpr (can_charconv) {
-        T out;
-        std::from_chars(first, last, out);
-        return out;
-    }
-    else if constexpr (std::is_same<T, int32_t>::value) {
+#if __cpp_lib_to_chars >= 201611L
+    T out;
+    std::from_chars(first, last, out);
+    return out;
+#else
+    if constexpr (std::is_same<T, int32_t>::value) {
         return strtol(std::string(first, last - first).c_str(), nullptr, 10);
     }
     else if constexpr (std::is_same<T, uint32_t>::value) {
@@ -57,6 +54,7 @@ constexpr T from_chars(const char* first, const char* last) {
         return stod(std::string(first, last - first), nullptr);
     }
     return {};
+#endif
 }
 
 namespace MariaCpp {

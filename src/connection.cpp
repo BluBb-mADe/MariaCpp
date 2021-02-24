@@ -38,10 +38,6 @@ int poll(struct pollfd* pfds, unsigned long int nfds, int timeout) {
 #endif
 #endif
 
-#if __cplusplus < 201103L
-# define unique_ptr auto_ptr
-#endif
-
 namespace MariaCpp {
 
     Connection::Connection()

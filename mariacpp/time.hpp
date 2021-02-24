@@ -24,7 +24,7 @@
 #include <string>
 #include <chrono>
 
-#ifndef __cpp_lib_chrono
+#if __cpp_lib_chrono < 201803L
 namespace std {
 namespace chrono {
     typedef duration<uint32_t, std::ratio<86400>> days;
