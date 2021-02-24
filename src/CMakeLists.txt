@@ -21,11 +21,18 @@ FILE(GLOB SRC *.cpp *.c)
 INCLUDE_DIRECTORIES(${MARIADB_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
 ADD_LIBRARY(mariacpp STATIC ${SRC})
 
-# windows clang-cl support
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC" OR MSVC)
-  target_compile_options(mariacpp PUBLIC /EHa /Zc:__cplusplus /MTd -m64)
-  add_link_options(/MTd)
-  add_compile_definitions(WIN32)
+# windows clang-cl
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+    MESSAGE("-- Compiler: windows clang-cl")
+    target_compile_options(mariacpp PUBLIC /EHa /MT$<$<CONFIG:Debug>:d>)
+    add_compile_definitions(WIN32)
+endif()
+
+# msvc
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    MESSAGE("-- Compiler: MSVC")
+    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    target_compile_options(mariacpp PUBLIC /MT$<$<CONFIG:Debug>:d>)
 endif()
 
 INSTALL(TARGETS mariacpp
