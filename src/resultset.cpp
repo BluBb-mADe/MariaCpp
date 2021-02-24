@@ -121,7 +121,7 @@ namespace MariaCpp {
     void ResultSet::fetchFieldNames() {
         _col_names.resize(_res->field_count);
         auto* fields = fetch_fields();
-        for (int i = 0; i < _res->field_count; ++i) {
+        for (unsigned int i = 0; i < _res->field_count; ++i) {
             _col_names[i] = std::string(fields[i].name, fields[i].name_length);
         }
     }

@@ -25,7 +25,6 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
-
 #include <charconv>
 
 template<typename T>
