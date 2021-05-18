@@ -77,7 +77,7 @@ namespace MariaCpp {
 
         bool setCString(const char* str);
 
-        bool setString(const std::string& str);
+        bool setString(std::string_view str);
 
         bool setBlob(const std::string& str);
 

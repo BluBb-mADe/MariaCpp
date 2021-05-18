@@ -147,7 +147,7 @@ namespace MariaCpp {
         // This is special: str==NULL is allowed
         void setString(idx_t col, const char* str);
 
-        void setString(idx_t col, const std::string& str);
+        void setString(idx_t col, std::string_view str);
 
         void setBinary(idx_t col, const std::string& v) { return setBlob(col, v); }
 

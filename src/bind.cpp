@@ -274,7 +274,7 @@ namespace MariaCpp {
         return setBuffer(str, str ? strlen(str) : 0, MYSQL_TYPE_STRING);
     }
 
-    bool Bind::setString(const std::string& str) {
+    bool Bind::setString(std::string_view str) {
         return setBuffer(str.data(), str.size(), MYSQL_TYPE_STRING);
     }
 

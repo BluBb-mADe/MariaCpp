@@ -261,7 +261,7 @@ namespace MariaCpp {
         if (param(col).setCString(str)) _bind_params = true;
     }
 
-    void PreparedStatement::setString(idx_t col, const std::string& str) {
+    void PreparedStatement::setString(idx_t col, std::string_view str) {
         if (param(col).setString(str)) _bind_params = true;
     }
 
