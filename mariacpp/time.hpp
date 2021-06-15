@@ -24,14 +24,14 @@
 #include <string>
 #include <chrono>
 
-#if __cpp_lib_chrono < 201803L
-namespace std {
-namespace chrono {
-    typedef duration<uint32_t, std::ratio<86400>> days;
-    typedef duration<uint32_t, std::ratio<604800>> weeks;
-    typedef duration<uint32_t, std::ratio<2629746>> months;
-    typedef duration<uint32_t, std::ratio<31556952>> years;
-}}
+#if __cpp_lib_chrono >= 201907
+using days = std::chrono::days;
+using months = std::chrono::months;
+using years = std::chrono::years;
+#else
+using days = std::chrono::duration<uint32_t, std::ratio<86400>>;
+using months = std::chrono::duration<uint32_t, std::ratio<2629746>>;
+using years = std::chrono::duration<uint32_t, std::ratio<31556952>>;
 #endif
 
 namespace MariaCpp {
