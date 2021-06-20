@@ -51,6 +51,8 @@ include_directories(
     ${MARIADB_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR})
 
+string(REGEX REPLACE "/EHsc?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 add_executable(connect connect.cpp)
 if(CMAKE_USE_PTHREADS_INIT)
   add_executable(threads threads.cpp)

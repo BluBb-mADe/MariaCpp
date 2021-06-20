@@ -21,6 +21,8 @@ FILE(GLOB SRC *.cpp *.c)
 INCLUDE_DIRECTORIES(${MARIADB_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
 ADD_LIBRARY(mariacpp STATIC ${SRC})
 
+set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d)
+
 # windows clang-cl
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     MESSAGE("-- Compiler: windows clang-cl")
@@ -31,8 +33,8 @@ endif()
 # msvc
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     MESSAGE("-- Compiler: MSVC")
-    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    target_compile_options(mariacpp PUBLIC /MT$<$<CONFIG:Debug>:d>)
+    string(REGEX REPLACE "/EHsc?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    target_compile_options(mariacpp PUBLIC /EHa /MT$<$<CONFIG:Debug>:d>)
 endif()
 
 INSTALL(TARGETS mariacpp
