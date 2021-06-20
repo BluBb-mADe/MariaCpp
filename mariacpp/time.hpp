@@ -24,7 +24,7 @@
 #include <string>
 #include <chrono>
 
-#if __cpp_lib_chrono >= 201907
+#if __cplusplus > 201703L
 using days = std::chrono::days;
 using months = std::chrono::months;
 using years = std::chrono::years;
