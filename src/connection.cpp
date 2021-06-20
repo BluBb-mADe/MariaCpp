@@ -194,7 +194,10 @@ namespace MariaCpp {
     }
 
     void Connection::throw_exception() {
-        throw mariadb_error(error_str(), errorno(), sqlstate());
+        auto err_str = error_str();
+        auto error_no = errorno();
+        auto state = sqlstate();
+        throw mariadb_error(err_str, error_no, state);
     }
 
 #ifdef MARIADB_VERSION_ID

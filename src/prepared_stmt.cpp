@@ -40,7 +40,10 @@ namespace MariaCpp {
     }
 
     void PreparedStatement::throw_exception() {
-        throw mariadb_error(error_str(), errorno(), sqlstate());
+        auto err_str = error_str();
+        auto err_no = errorno();
+        auto state = sqlstate();
+        throw mariadb_error(err_str, err_no, state);
     }
 
     void PreparedStatement::attr_get(enum enum_stmt_attr_type option, void* arg) const {
