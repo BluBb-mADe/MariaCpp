@@ -31,7 +31,10 @@ namespace MariaCpp {
 
     class ResultSet {
     public:
-        ResultSet(Connection& conn, MYSQL_RES* res) : _conn(conn), _res(res), _row(), _lengths() {}
+        ResultSet(Connection& conn, MYSQL_RES* res, bool fetch_names = false) : _conn(conn), _res(res), _row(), _lengths() {
+            if (fetch_names)
+                fetchFieldNames();
+        }
 
         ~ResultSet() { if (_res) mysql_free_result(_res); }
 

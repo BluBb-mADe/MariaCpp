@@ -234,11 +234,11 @@ namespace MariaCpp {
         // Instead use: prepare(sql) or new PreparedStatment(*this)
         MYSQL_STMT* stmt_init();
 
-        ResultSet* store_result();
+        ResultSet* store_result(bool fetch_names = false);
 
         unsigned long thread_id() { return mysql_thread_id(&mysql); }
 
-        ResultSet* use_result();
+        ResultSet* use_result(bool fetch_names = false);
 
         unsigned int warning_count() { return mysql_warning_count(&mysql); }
 

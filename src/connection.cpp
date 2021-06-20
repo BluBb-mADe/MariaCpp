@@ -181,16 +181,16 @@ namespace MariaCpp {
         return stmt;
     }
 
-    ResultSet* Connection::store_result() {
+    ResultSet* Connection::store_result(bool fetch_names) {
         MYSQL_RES* res = mysql_store_result(&mysql);
         if (!res && errorno()) throw_exception();
-        return res ? new ResultSet(*this, res) : nullptr;
+        return res ? new ResultSet(*this, res, fetch_names) : nullptr;
     }
 
-    ResultSet* Connection::use_result() {
+    ResultSet* Connection::use_result(bool fetch_names) {
         MYSQL_RES* res = mysql_use_result(&mysql);
         if (!res && errorno()) throw_exception();
-        return res ? new ResultSet(*this, res) : nullptr;
+        return res ? new ResultSet(*this, res, fetch_names) : nullptr;
     }
 
     void Connection::throw_exception() {
