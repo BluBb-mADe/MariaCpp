@@ -20,6 +20,7 @@
 #define MARIACPP_CONNECTION_HPP
 
 #include <mysql.h>
+#include <mysqld_error.h>
 #include <cassert>
 #include <string>
 
@@ -139,12 +140,22 @@ namespace MariaCpp {
 
         void query(const char* sql) {
             CC();
-            if (mysql_query(&mysql, sql)) throw_exception();
+            if (mysql_query(&mysql, sql)) {
+                if (errorno() != ER_LOCK_DEADLOCK) {
+                    throw_exception();
+                }
+                query(sql);
+            }
         }
 
         void query(const char* sql, unsigned long length) {
             CC();
-            if (mysql_real_query(&mysql, sql, length)) throw_exception();
+            if (mysql_real_query(&mysql, sql, length)) {
+                if (errorno() != ER_LOCK_DEADLOCK) {
+                    throw_exception();
+                }
+                query(sql, length);
+            }
         }
 
         void query(const std::string& sql) { return query(sql.data(), static_cast<unsigned long>(sql.size())); }

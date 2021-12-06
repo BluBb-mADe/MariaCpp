@@ -22,6 +22,7 @@
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/time.hpp>
 #include <mariacpp/bits/bind.hpp>
+#include <mysqld_error.h>
 #include <cstdlib>
 #include <memory>
 #include <vector>
@@ -105,7 +106,11 @@ namespace MariaCpp {
 
     void PreparedStatement::execute() {
         if (_bind_params) do_bind_params();
-        if (mysql_stmt_execute(_stmt)) throw_exception();
+        if (mysql_stmt_execute(_stmt)) {
+            if (errorno() != ER_LOCK_DEADLOCK)
+                throw_exception();
+            execute();
+        }
     }
 
     void PreparedStatement::do_bind_results() {
