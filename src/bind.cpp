@@ -175,7 +175,7 @@ namespace MariaCpp {
     }
 
     unsigned long Bind::data_length() const {
-        return std::min(_length, static_cast<unsigned long>(_buffer.size(_heap)));
+        return std::min<size_t>(_length, _buffer.size(_heap));
     }
 
     template<typename T>
