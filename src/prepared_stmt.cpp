@@ -241,12 +241,12 @@ namespace MariaCpp {
         if (param(col).setUInt(value)) _bind_params = true;
     }
 
-    void PreparedStatement::setBigInt(idx_t col, int64_t value) {
-        if (param(col).setBigInt(value)) _bind_params = true;
+    void PreparedStatement::setInt64(idx_t col, int64_t value) {
+        if (param(col).setInt64(value)) _bind_params = true;
     }
 
-    void PreparedStatement::setUBigInt(idx_t col, uint64_t value) {
-        if (param(col).setUBigInt(value)) _bind_params = true;
+    void PreparedStatement::setUInt64(idx_t col, uint64_t value) {
+        if (param(col).setUInt64(value)) _bind_params = true;
     }
 
     void PreparedStatement::setBlob(idx_t col, const std::string& value) {
@@ -293,12 +293,12 @@ namespace MariaCpp {
         return result(col).getUInt();
     }
 
-    int64_t PreparedStatement::getBigInt(idx_t col) const {
-        return result(col).getBigInt();
+    int64_t PreparedStatement::getInt64(idx_t col) const {
+        return result(col).getInt64();
     }
 
-    uint64_t PreparedStatement::getUBigInt(idx_t col) const {
-        return result(col).getUBigInt();
+    uint64_t PreparedStatement::getUInt64(idx_t col) const {
+        return result(col).getUInt64();
     }
 
     float PreparedStatement::getFloat(idx_t col) const {
@@ -337,12 +337,12 @@ namespace MariaCpp {
         return getUInt(getFieldIndexByName(col));
     }
 
-    int64_t PreparedStatement::getBigInt(const std::string& col) const {
-        return getBigInt(getFieldIndexByName(col));
+    int64_t PreparedStatement::getInt64(const std::string& col) const {
+        return getInt64(getFieldIndexByName(col));
     }
 
-    uint64_t PreparedStatement::getUBigInt(const std::string& col) const {
-        return getUBigInt(getFieldIndexByName(col));
+    uint64_t PreparedStatement::getUInt64(const std::string& col) const {
+        return getUInt64(getFieldIndexByName(col));
     }
 
     float PreparedStatement::getFloat(const std::string& col) const {

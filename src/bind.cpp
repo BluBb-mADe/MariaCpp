@@ -254,11 +254,11 @@ namespace MariaCpp {
         return setNumeric(value, MYSQL_TYPE_LONG, true);
     }
 
-    bool Bind::setBigInt(int64_t value) {
+    bool Bind::setInt64(int64_t value) {
         return setNumeric(value, MYSQL_TYPE_LONGLONG, false);
     }
 
-    bool Bind::setUBigInt(uint64_t value) {
+    bool Bind::setUInt64(uint64_t value) {
         return setNumeric(value, MYSQL_TYPE_LONGLONG, true);
     }
 
@@ -307,11 +307,11 @@ namespace MariaCpp {
 
 
     int32_t Bind::getInt() const {
-        return static_cast<int32_t>(getBigInt());
+        return static_cast<int32_t>(getInt64());
     }
 
     uint32_t Bind::getUInt() const {
-        return static_cast<uint32_t>(getUBigInt());
+        return static_cast<uint32_t>(getUInt64());
     }
 
     std::string Bind::getString() const {
@@ -342,8 +342,8 @@ namespace MariaCpp {
             case MYSQL_TYPE_LONG:
             case MYSQL_TYPE_INT24:
             case MYSQL_TYPE_LONGLONG:
-                if (_unsigned) os << getUBigInt();
-                else os << getUBigInt();
+                if (_unsigned) os << getUInt64();
+                else os << getUInt64();
                 break;
             case MYSQL_TYPE_FLOAT:
                 os << std::scientific << std::setprecision(9) << *reinterpret_cast<const float*>(data);
@@ -363,7 +363,7 @@ namespace MariaCpp {
         return os.str();
     }
 
-    int64_t Bind::getBigInt() const {
+    int64_t Bind::getInt64() const {
         if (_unsigned) return getUInt();
         const char* data = reinterpret_cast<char*>(_buffer.data(_heap));
         if (_null || !data) return 0;
@@ -410,7 +410,7 @@ namespace MariaCpp {
         return 0;
     }
 
-    uint64_t Bind::getUBigInt() const {
+    uint64_t Bind::getUInt64() const {
         if (!_unsigned) return getInt();
         const char* data = reinterpret_cast<char*>(_buffer.data(_heap));
         if (_null || !data) return 0;

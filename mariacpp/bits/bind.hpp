@@ -65,9 +65,9 @@ namespace MariaCpp {
 
         bool setUInt(uint32_t value);
 
-        bool setBigInt(int64_t value);
+        bool setInt64(int64_t value);
 
-        bool setUBigInt(uint64_t value);
+        bool setUInt64(uint64_t value);
 
         bool setBoolean(bool value) { return setTinyInt(value); }
 
@@ -87,7 +87,7 @@ namespace MariaCpp {
 
         bool setTime(const Time& time) { return setDateTime(time); }
 
-        bool setTimeStamp(const uint64_t time) { return setUBigInt(time); }
+        bool setTimeStamp(const uint64_t time) { return setUInt64(time); }
 
         bool isNull() const { return _null; }
 
@@ -97,9 +97,9 @@ namespace MariaCpp {
 
         uint32_t getUInt() const;
 
-        int64_t getBigInt() const;
+        int64_t getInt64() const;
 
-        uint64_t getUBigInt() const;
+        uint64_t getUInt64() const;
 
         float getFloat() const;
 

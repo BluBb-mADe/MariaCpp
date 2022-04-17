@@ -132,9 +132,9 @@ namespace MariaCpp {
 
         void setUInt(idx_t col, uint32_t value);
 
-        void setBigInt(idx_t col, int64_t value);
+        void setInt64(idx_t col, int64_t value);
 
-        void setUBigInt(idx_t col, uint64_t value);
+        void setUInt64(idx_t col, uint64_t value);
 
         void setBlob(idx_t col, const std::string& v);
 
@@ -179,9 +179,9 @@ namespace MariaCpp {
 
         uint32_t getUInt(idx_t col) const;
 
-        int64_t getBigInt(idx_t col) const;
+        int64_t getInt64(idx_t col) const;
 
-        uint64_t getUBigInt(idx_t col) const;
+        uint64_t getUInt64(idx_t col) const;
 
         bool getBoolean(unsigned col) const { return getInt(col); }
 
@@ -205,9 +205,9 @@ namespace MariaCpp {
 
         uint32_t getUInt(const std::string& col) const;
 
-        int64_t getBigInt(const std::string& col) const;
+        int64_t getInt64(const std::string& col) const;
 
-        uint64_t getUBigInt(const std::string& col) const;
+        uint64_t getUInt64(const std::string& col) const;
 
         bool getBoolean(const std::string& col) const { return getInt(col); }
 
