@@ -21,19 +21,19 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.9)
 PROJECT(mariacpp)
 SET(CMAKE_CXX_STANDARD 20)
 
+find_library(MARIADB_LIBRARY
+        NAMES libmariadb mariadb
+        PATH_SUFFIXES mariadb lib
+        REQUIRED)
+
+MESSAGE("-- Found mariadb library: ${MARIADB_LIBRARY}")
+
 find_path(MARIADB_INCLUDE_DIR
     mysql.h
-    PATH_SUFFIXES mariadb include
+    PATH_SUFFIXES .. include ../include lib
     REQUIRED)
 
 MESSAGE("-- Found mariadb include: ${MARIADB_INCLUDE_DIR}")
-
-find_library(MARIADB_LIBRARY
-    NAMES libmariadb mariadb
-    PATH_SUFFIXES mariadb lib
-    REQUIRED)
-
-MESSAGE("-- Found mariadb library: ${MARIADB_LIBRARY}")
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads REQUIRED)
