@@ -30,7 +30,7 @@ MESSAGE("-- Found mariadb library: ${MARIADB_LIBRARY}")
 
 find_path(MARIADB_INCLUDE_DIR
     mysql.h
-    PATH_SUFFIXES .. include ../include lib
+    PATH_SUFFIXES .. include ../include lib mysql
     REQUIRED)
 
 MESSAGE("-- Found mariadb include: ${MARIADB_INCLUDE_DIR}")
