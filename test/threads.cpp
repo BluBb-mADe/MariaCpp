@@ -26,6 +26,7 @@
 #include <condition_variable>
 #include <future>
 #include <chrono>
+#include <vector>
 
 using namespace std::literals;
 
