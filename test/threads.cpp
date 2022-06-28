@@ -16,68 +16,67 @@
   or write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *****************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
 #include <mariacpp/lib.hpp>
 #include <mariacpp/connection.hpp>
 #include <mariacpp/mariadb_error.hpp>
 #include <mariacpp/uri.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <errno.h>
-#include <stdio.h>
+#include <condition_variable>
+#include <future>
+#include <chrono>
 
-#define handle_error_en(en, msg)                                        \
-    do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+using namespace std::literals;
 
-#define handle_error(msg)                                               \
-    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+std::atomic<bool> run_threads = false;
 
-struct thread_info {        /* Used as argument to thread_start() */
-    pthread_t thread_id;        /* ID returned by pthread_create() */
-    int thread_num;             /* Application-defined thread # */
-    const char* uri;
-    const char* user;
-    const char* passwd;
-    unsigned long conn_id;
-    std::string stats;
+std::mutex mutex;
+std::condition_variable cond;
+int counter = 0;
+
+struct thread_result {
+	unsigned thread_index = -1;
+	unsigned long conn_id = 0;
+	std::string conn_stats{};
+	bool failed = true;
 };
 
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-static int counter = 0;
-
-void* thread_start(void* arg) {
+thread_result thread_start(char const* uri, char const* user, char const* passwd, unsigned thread_i) {
+	thread_result res {.thread_index = thread_i};
     // It's very important to call thread_init() method
     MariaCpp::scoped_thread_init maria_thread;
-
-    thread_info* tinfo = reinterpret_cast<thread_info*>(arg);
-    const int tn = tinfo->thread_num;
 
     try {
         MariaCpp::Connection conn;
         // Connect to DB using MySQL Connector/C++ style host URI.
         // You can also use alternative connect() method with
         // the same arguments as C-API.
-        conn.connect(MariaCpp::Uri(tinfo->uri), tinfo->user, tinfo->passwd);
+        conn.connect(MariaCpp::Uri(uri), user, passwd);
 
-        // Wait on condition for other threads to connect...
-        pthread_mutex_lock(&mutex);
-        counter++;
-        std::clog << tn << ". Connection status: SUCESS" << std::endl;
-        pthread_cond_wait(&cond, &mutex);
-        pthread_mutex_unlock(&mutex);
+        std::clog << thread_i << ". Connection status: SUCCESS" << std::endl;
+	    res.conn_id = conn.thread_id();
+	    // Wait on condition for other threads to connect...
+	    {
+			std::unique_lock ul{mutex};
+			++counter;
+		}
+	    run_threads.wait(false);
 
         // Each thread has connection do DB.
         // You can put here whatever queries you want
 
-        tinfo->conn_id = conn.thread_id();
-        tinfo->stats = conn.stat();
-
+		res.conn_stats = conn.stat();
         conn.close(); // optional
-    } catch (MariaCpp::mariadb_error& e) {
-        std::cerr << e << std::endl;
-        return (void*) 1;
+	    res.failed = false;
     }
-    return 0;
+	catch (MariaCpp::mariadb_error& e) {
+        std::cerr << e << std::endl;
+    }
+    catch (std::exception& e) {
+	    std::cerr << e.what() << std::endl;
+	}
+	return res;
 }
 
 int main() {
@@ -92,11 +91,11 @@ int main() {
     if (MariaCpp::thread_safe())
         std::clog << "MariaDB library is thread safe: OK" << std::endl;
     else
-        std::cerr << "Ups... MariaDB library is NOT thread safe!" << std::endl;
+        std::cerr << "Oops... MariaDB library is NOT thread safe!" << std::endl;
 
-    const char* uri = std::getenv("TEST_DB_URI");
-    const char* user = std::getenv("TEST_DB_USER");
-    const char* passwd = std::getenv("TEST_DB_PASSWD");
+    char const* uri = std::getenv("TEST_DB_URI");
+    char const* user = std::getenv("TEST_DB_USER");
+    char const* passwd = std::getenv("TEST_DB_PASSWD");
     if (!uri) uri = "tcp://localhost:3306/test";
     if (!user) user = "test";
     if (!passwd) passwd = "";
@@ -104,54 +103,43 @@ int main() {
     std::clog << "DB user: " << user << std::endl;
     std::clog << "DB passwd: " << passwd << std::endl;
 
-    const unsigned num_threads = 5;
-    struct thread_info* tinfo;
-    tinfo = new thread_info[num_threads];
+    unsigned const num_threads = 5;
+	std::vector<std::future<thread_result>> futures;
 
-    // Create threads
+    // Create futures
     for (unsigned tnum = 0; tnum < num_threads; tnum++) {
-        thread_info& t = tinfo[tnum];
-        tinfo[tnum].thread_num = tnum + 1;
-        tinfo[tnum].uri = uri;
-        tinfo[tnum].user = user;
-        tinfo[tnum].passwd = passwd;
-
-        int s = pthread_create(&tinfo[tnum].thread_id, NULL, &thread_start, &tinfo[tnum]);
-        if (s != 0)
-            handle_error_en(s, "pthread_create");
+	    futures.emplace_back(std::async(thread_start, uri, user, passwd, tnum));
     }
 
     // Wait for threads to enter condition
-    time_t now = time(NULL);
-    while (true) {
-        pthread_mutex_lock(&mutex);
-        int c = counter;
-        pthread_mutex_unlock(&mutex);
-        if (c == num_threads) break;
-        pthread_yield();
-        if (now + 3 < time(NULL)) {
-            std::cerr << "TIMEOUT" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-    }
+	{
+		std::unique_lock ul{mutex};
+		if (!cond.wait_for(ul, 3s, [] { return counter < num_threads; })) {
+			std::cerr << "TIMEOUT" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+
     // trigger (start) all threads
-    pthread_cond_broadcast(&cond);
+    run_threads = true;
+	run_threads.notify_all();
 
-    // Wait for threads and print results
-    int result = 0;
-    for (unsigned tnum = 0; tnum < num_threads; tnum++) {
-        thread_info& t = tinfo[tnum];
-        void* res;
-        int s = pthread_join(tinfo[tnum].thread_id, &res);
-        if (s != 0)
-            handle_error_en(s, "pthread_join");
-        result += (int) (long) res;
+    // Wait for futures and print results
+	int err_count = 0;
+	auto fut = futures.begin();
+	while (!futures.empty()) {
+		if (fut->wait_for(10ms) != std::future_status::ready) {
+			if (++fut == futures.end())
+				fut = futures.begin();
+			continue;
+		}
+		auto res = fut->get();
+		std::clog << res.thread_index << ". Finished res=" << !res.failed << std::endl;
+		std::clog << "   conn id: " << res.conn_id << std::endl;
+		std::clog << "   stats: " << res.conn_stats << std::endl;
+		err_count += res.failed;
+		fut = futures.erase(fut);
+	}
 
-        std::clog << t.thread_num << ". Finished res=" << (int) (long) res << std::endl;
-        std::clog << "   conn id: " << t.conn_id << std::endl;
-        std::clog << "   stats: " << t.stats << std::endl;
-    }
-
-    delete[] tinfo;
-    return result;
+    return err_count;
 }

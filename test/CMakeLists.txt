@@ -54,9 +54,7 @@ include_directories(
 string(REGEX REPLACE "/EHsc?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 add_executable(connect connect.cpp)
-if(CMAKE_USE_PTHREADS_INIT)
-  add_executable(threads threads.cpp)
-endif()
+add_executable(threads threads.cpp)
 add_executable(query query.cpp)
 add_executable(prepstmtc prepstmtc.cpp)
 add_executable(prepstmtcpp prepstmtcpp.cpp)
