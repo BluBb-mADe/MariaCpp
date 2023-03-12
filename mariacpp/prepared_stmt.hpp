@@ -223,6 +223,8 @@ namespace MariaCpp {
 
         Time getTimeStamp(const std::string& col) const; // same as getDateTime(col)
 
+		bool isNull(const std::string& col) const;
+
         int getFieldIndexByName(const std::string& name) const;
 
 #   ifdef MARIADB_VERSION_ID

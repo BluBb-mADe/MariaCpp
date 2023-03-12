@@ -369,6 +369,10 @@ namespace MariaCpp {
         return getTimeStamp(getFieldIndexByName(col));
     }
 
+	bool PreparedStatement::isNull(const std::string& col) const {
+		return isNull(getFieldIndexByName(col));
+	}
+
     static bool lc_equals(const std::string& a, const std::string& b) {
         return a.size() == b.size() && std::ranges::equal(a, b,
                   [](const char c, const char d) {

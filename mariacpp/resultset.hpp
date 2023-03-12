@@ -111,6 +111,8 @@ namespace MariaCpp {
 
         void fetchFieldNames();
 
+		bool isNull(const std::string& col) const;
+
         std::string getString(const std::string& col) const;
 
         std::string getBinary(const std::string& col) const { return getString(col); }

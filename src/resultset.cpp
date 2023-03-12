@@ -126,6 +126,10 @@ namespace MariaCpp {
         }
     }
 
+	bool ResultSet::isNull(const std::string& col) const {
+		return isNull(getFieldIndexByName(col));
+	}
+
     std::string ResultSet::getString(const std::string& col) const {
         return getString(getFieldIndexByName(col));
     }
