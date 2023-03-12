@@ -21,11 +21,11 @@ FILE(GLOB SRC *.cpp *.c)
 INCLUDE_DIRECTORIES(${MARIADB_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
 ADD_LIBRARY(mariacpp STATIC ${SRC})
 
-set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d)
+MESSAGE("-- ${CMAKE_BUILD_TYPE} build")
 
 # windows clang-cl
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    MESSAGE("-- Compiler: windows clang-cl")
+    MESSAGE("-- Compiler: clang-cl")
     target_compile_options(mariacpp PUBLIC /EHa /MT$<$<CONFIG:Debug>:d>)
     add_compile_definitions(WIN32)
 endif()
@@ -33,8 +33,27 @@ endif()
 # msvc
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     MESSAGE("-- Compiler: MSVC")
-    string(REGEX REPLACE "/EHsc?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    target_compile_options(mariacpp PUBLIC /EHa /MT$<$<CONFIG:Debug>:d>)
+
+    set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
+    foreach(CompilerFlag ${CompilerFlags})
+        string(REPLACE "/MDd?" "" ${CompilerFlag} "${${CompilerFlag}}")
+        set(${CompilerFlag} "${${CompilerFlag}}" CACHE STRING "msvc compiler flags" FORCE)
+    endforeach()
+    string(REGEX REPLACE "/EHs?c?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+    target_compile_options(mariacpp PUBLIC /EHa /Zc:__cplusplus /MT$<$<CONFIG:Debug>:d>)
+endif()
+
+set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d)
+
+if(DEFINED ASAN)
+    MESSAGE("-- address sanitizer enabled")
+    get_target_property(suffix mariacpp DEBUG_POSTFIX)
+    set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX ${suffix}_as)
+    target_compile_options(mariacpp PUBLIC /fsanitize=address)
+    add_compile_definitions(_DISABLE_VECTOR_ANNOTATION)
+    add_compile_definitions(_DISABLE_STRING_ANNOTATION)
+    set(ignoreMe "${ASAN}")
 endif()
 
 INSTALL(TARGETS mariacpp
