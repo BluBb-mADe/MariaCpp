@@ -77,7 +77,25 @@ namespace MariaCpp {
             return t;
         }
 
-        void print(std::ostream& os) const;
+	    time_t to_time_t() {
+		    std::tm tm{};
+		    tm.tm_year = this->year - 1900;
+		    tm.tm_mon = this->month - 1;
+		    tm.tm_mday = this->day;
+		    tm.tm_hour = this->hour;
+		    tm.tm_min = this->minute;
+		    tm.tm_sec = this->second;
+		    auto time = std::mktime(&tm);
+		    auto local_tm = std::localtime(&time);
+		    return std::mktime(local_tm);
+	    }
+
+	    template<typename T=system_clock>
+	    time_point<T> to_time_point() {
+		    return T::from_time_t(to_time_t());
+	    }
+
+	    void print(std::ostream& os) const;
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Time& time) {
