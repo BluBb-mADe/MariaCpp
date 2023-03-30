@@ -133,7 +133,7 @@ namespace MariaCpp {
                 _col_names[i] = std::string(fields[i].name, fields[i].name_length);
                 par[i] = _results[i].init(&fields[i]);
             }
-            bind_result(&par[0]);
+            bind_result(par.data());
         }
     }
 

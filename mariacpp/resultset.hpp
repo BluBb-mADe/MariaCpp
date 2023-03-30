@@ -31,6 +31,8 @@ namespace MariaCpp {
 
     class ResultSet {
     public:
+	    typedef unsigned int idx_t;
+
         ResultSet(Connection& conn, MYSQL_RES* res, bool fetch_names = false) : _conn(conn), _res(res), _row(), _lengths() {
             if (fetch_names)
                 fetchFieldNames();
@@ -44,7 +46,7 @@ namespace MariaCpp {
 
         MYSQL_FIELD* fetch_field() const { return mysql_fetch_field(_res); }
 
-        MYSQL_FIELD* fetch_field_direct(unsigned col) const {
+        MYSQL_FIELD* fetch_field_direct(idx_t col) const {
             assert_col(col);
             return mysql_fetch_field_direct(_res, col);
         }
@@ -81,33 +83,33 @@ namespace MariaCpp {
         MYSQL_ROW_OFFSET row_tell() { return mysql_row_tell(_res); }
 
         // getRaw() might return NULL, iff column is NULL
-        const char* getRaw(unsigned col) const {
+        const char* getRaw(idx_t col) const {
             assert_col(col);
             return _row[col];
         }
 
-        bool isNull(unsigned col) const {
+        bool isNull(idx_t col) const {
             assert_col(col);
             return !_row[col];
         }
 
-        std::string getString(unsigned col) const;
+        std::string getString(idx_t col) const;
 
-        std::string getBinary(unsigned col) const { return getString(col); }
+        std::string getBinary(idx_t col) const { return getString(col); }
 
-        int32_t getInt(unsigned col) const;
+        int32_t getInt(idx_t col) const;
 
-        uint32_t getUInt(unsigned col) const;
+        uint32_t getUInt(idx_t col) const;
 
-        int64_t getInt64(unsigned col) const;
+        int64_t getInt64(idx_t col) const;
 
-        uint64_t getUInt64(unsigned col) const;
+        uint64_t getUInt64(idx_t col) const;
 
-        bool getBoolean(unsigned col) const { return getInt(col); }
+        bool getBoolean(idx_t col) const { return getInt(col); }
 
-        float getFloat(unsigned col) const;
+        float getFloat(idx_t col) const;
 
-        double getDouble(unsigned col) const;
+		double getDouble(idx_t col) const;
 
         void fetchFieldNames();
 
@@ -131,7 +133,7 @@ namespace MariaCpp {
 
         double getDouble(const std::string& col) const;
 
-        unsigned long length(unsigned col) const {
+		idx_t length(idx_t col) const {
             assert_col(col);
             return fetch_lengths() ? _lengths[col] : 0;
         }
@@ -155,7 +157,7 @@ namespace MariaCpp {
 #   endif /* MARIADB_VERSION_ID */
 
     private:
-        inline void assert_col(unsigned col) const;
+        inline void assert_col(idx_t col) const;
 
         // Noncopyable
         ResultSet(const ResultSet&);
@@ -171,7 +173,7 @@ namespace MariaCpp {
         int getFieldIndexByName(const std::string& name) const;
     };
 
-    void ResultSet::assert_col(unsigned col) const {
+    void ResultSet::assert_col(idx_t col) const {
         assert(col < _res->field_count);
     }
 }

@@ -24,11 +24,7 @@
 #include <string>
 #include <chrono>
 
-#if __cplusplus > 201703L
-using days = std::chrono::days;
-using months = std::chrono::months;
-using years = std::chrono::years;
-#else
+#if __cplusplus <= 201703L
 using days = std::chrono::duration<uint32_t, std::ratio<86400>>;
 using months = std::chrono::duration<uint32_t, std::ratio<2629746>>;
 using years = std::chrono::duration<uint32_t, std::ratio<31556952>>;
@@ -58,10 +54,10 @@ namespace MariaCpp {
         static Time datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second);
 
         template<typename T>
-        static Time datetime(std::chrono::time_point<T> tp) {
+        static Time datetime(time_point<T> tp) {
             MYSQL_TIME t;
             auto du = tp.time_since_epoch();
-            t.year = duration_cast<std::chrono::years>(du).count();
+            t.year = duration_cast<years>(du).count();
             du -= years(t.year);
             t.month = duration_cast<months>(du).count();
             du -= months(t.month);

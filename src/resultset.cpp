@@ -31,7 +31,7 @@ namespace MariaCpp {
         return _row;
     }
 
-    std::string ResultSet::getString(unsigned col) const {
+    std::string ResultSet::getString(idx_t col) const {
         assert_col(col);
         const char* data = _row[col];
         if (!data) return std::string();
@@ -39,7 +39,7 @@ namespace MariaCpp {
         return std::string(data, len);
     }
 
-    int32_t ResultSet::getInt(unsigned col) const {
+    int32_t ResultSet::getInt(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         if (fetch_field_direct(col)->flags & UNSIGNED_FLAG)
@@ -47,7 +47,7 @@ namespace MariaCpp {
         return strtol(_row[col], NULL, 10);
     }
 
-    int64_t ResultSet::getInt64(unsigned col) const {
+    int64_t ResultSet::getInt64(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         if (fetch_field_direct(col)->flags & UNSIGNED_FLAG)
@@ -55,7 +55,7 @@ namespace MariaCpp {
         return strtoll(_row[col], NULL, 10);
     }
 
-    uint32_t ResultSet::getUInt(unsigned col) const {
+    uint32_t ResultSet::getUInt(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         if (fetch_field_direct(col)->flags & UNSIGNED_FLAG)
@@ -63,7 +63,7 @@ namespace MariaCpp {
         return strtol(_row[col], NULL, 10);
     }
 
-    uint64_t ResultSet::getUInt64(unsigned col) const {
+    uint64_t ResultSet::getUInt64(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         if (fetch_field_direct(col)->flags & UNSIGNED_FLAG)
@@ -71,13 +71,13 @@ namespace MariaCpp {
         return strtoll(_row[col], NULL, 10);
     }
 
-    float ResultSet::getFloat(unsigned col) const {
+    float ResultSet::getFloat(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         return strtof(_row[col], NULL);
     }
 
-    double ResultSet::getDouble(unsigned col) const {
+    double ResultSet::getDouble(idx_t col) const {
         assert_col(col);
         if (isNull(col)) return 0;
         return strtod(_row[col], NULL);
