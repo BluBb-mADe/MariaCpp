@@ -81,9 +81,7 @@ namespace MariaCpp {
 		    tm.tm_hour = this->hour;
 		    tm.tm_min = this->minute;
 		    tm.tm_sec = this->second;
-		    auto time = std::mktime(&tm);
-		    auto local_tm = std::localtime(&time);
-		    return std::mktime(local_tm);
+		    return std::mktime(&tm);
 	    }
 
 	    template<typename T=system_clock>
