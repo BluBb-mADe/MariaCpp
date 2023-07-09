@@ -22,7 +22,6 @@
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/time.hpp>
 #include <mariacpp/bits/bind.hpp>
-#include <mysqld_error.h>
 #include <cstdlib>
 #include <memory>
 #include <vector>
@@ -40,7 +39,7 @@ namespace MariaCpp {
         if (_stmt) mysql_stmt_close(_stmt); // No throw even on error (dtor!)
     }
 
-    void PreparedStatement::throw_exception() {
+    void PreparedStatement::throw_exception() const {
         auto err_str = error_str();
         auto err_no = errorno();
         auto state = sqlstate();

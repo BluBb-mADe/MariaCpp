@@ -211,8 +211,9 @@ namespace MariaCpp {
         int res = -1;
 
         pfd.fd = get_socket();
-        pfd.events = (_async_status & MYSQL_WAIT_READ ? POLLIN : 0) | (_async_status & MYSQL_WAIT_WRITE ? POLLOUT : 0) |
-                     (_async_status & MYSQL_WAIT_EXCEPT ? POLLPRI : 0);
+        pfd.events = (_async_status & MYSQL_WAIT_READ ? POLLIN : 0)
+		           | (_async_status & MYSQL_WAIT_WRITE ? POLLOUT : 0)
+				   | (_async_status & MYSQL_WAIT_EXCEPT ? POLLPRI : 0);
         int timeout = _async_status & MYSQL_WAIT_TIMEOUT ? get_timeout_value_ms() : -1;
 
         do {

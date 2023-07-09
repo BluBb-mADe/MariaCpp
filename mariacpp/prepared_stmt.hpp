@@ -279,11 +279,7 @@ namespace MariaCpp {
 
         void operator=(PreparedStatement&);
 
-        // Implicit convertion from char* to std::string not allowed
-        // Please use setCString(idx_t, const char *) instead!
-        // void setString(idx_t col, const char *str);
-
-        void throw_exception();
+        void throw_exception() const;
 
         inline Bind& param(idx_t col);
 
