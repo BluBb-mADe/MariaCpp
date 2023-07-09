@@ -29,19 +29,17 @@
 namespace MariaCpp {
     class mariadb_error : public std::runtime_error {
     public:
-        mariadb_error(const char* str, unsigned number, const char* sqlstate) : std::runtime_error(str), errno_(number) {
-            std::memcpy(sqlstate_, sqlstate, sqlstate_length_);
-            sqlstate_[sqlstate_length_] = '\0';
-        }
+        mariadb_error(const char* str, unsigned number, const char* sqlstate)
+		: std::runtime_error(str), errno_(number), sqlstate_(sqlstate) { }
 
         explicit mariadb_error(MYSQL* con) : mariadb_error(mysql_error(con), mysql_errno(con), mysql_sqlstate(con)) {}
 
         explicit mariadb_error(MYSQL_STMT* con) : mariadb_error(mysql_stmt_error(con), mysql_stmt_errno(con), mysql_stmt_sqlstate(con)) {}
 
-        explicit mariadb_error(const std::string& reason) : std::runtime_error(reason), errno_(0) { sqlstate_[0] = '\0'; }
+        explicit mariadb_error(const std::string& reason) : std::runtime_error(reason), errno_(0) { }
 
         void print(std::ostream& os) const {
-            if (!errno_ && !sqlstate_[0])
+            if (!errno_ && sqlstate_.empty())
                 os << "MariaDB lib ERROR: " << what();
             else
                 os << "MariaDB SQL ERROR " << errno_ << " (" << sqlstate_ << ") " << what();
@@ -50,9 +48,8 @@ namespace MariaCpp {
         [[nodiscard]] unsigned errorno() const { return errno_; }
 
     private:
-        static const unsigned sqlstate_length_ = 5;
         const unsigned errno_;
-        char sqlstate_[sqlstate_length_ + 1]{};
+        std::string sqlstate_;
     };
 
     inline std::ostream& operator<<(std::ostream& os, const mariadb_error& ex) {
