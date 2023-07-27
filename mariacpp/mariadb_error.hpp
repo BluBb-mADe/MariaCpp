@@ -23,20 +23,24 @@
 #include <stdexcept>
 #include <iosfwd>
 #include <cstring>
+#include <stacktrace>
+#include <utility>
 
 #include <mysql.h>
 
 namespace MariaCpp {
     class mariadb_error : public std::runtime_error {
     public:
-        mariadb_error(const char* str, unsigned number, const char* sqlstate)
-		: std::runtime_error(str), errno_(number), sqlstate_(sqlstate) { }
+        mariadb_error(const char* str, unsigned number, const char* sqlstate,
+					  std::stacktrace stacktrace=std::stacktrace::current())
+		: std::runtime_error(str), errno_(number), sqlstate_(sqlstate), stacktrace_(std::move(stacktrace)) { }
 
         explicit mariadb_error(MYSQL* con) : mariadb_error(mysql_error(con), mysql_errno(con), mysql_sqlstate(con)) {}
 
         explicit mariadb_error(MYSQL_STMT* con) : mariadb_error(mysql_stmt_error(con), mysql_stmt_errno(con), mysql_stmt_sqlstate(con)) {}
 
-        explicit mariadb_error(const std::string& reason) : std::runtime_error(reason), errno_(0) { }
+        explicit mariadb_error(const std::string& reason, std::stacktrace stacktrace=std::stacktrace::current())
+		: std::runtime_error(reason), errno_(0), stacktrace_(std::move(stacktrace)) { }
 
         void print(std::ostream& os) const {
             if (!errno_ && sqlstate_.empty())
@@ -47,9 +51,12 @@ namespace MariaCpp {
 
         [[nodiscard]] unsigned errorno() const { return errno_; }
 
+		[[nodiscard]] std::stacktrace const& get_stacktrace() const { return stacktrace_; }
+
     private:
         const unsigned errno_;
         std::string sqlstate_;
+		std::stacktrace stacktrace_;
     };
 
     inline std::ostream& operator<<(std::ostream& os, const mariadb_error& ex) {
