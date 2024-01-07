@@ -25,24 +25,31 @@ SET(TEST_DB_URI "tcp://localhost:3306/test" CACHE STRING "DB URI")
 SET(TEST_DB_USER "test" CACHE STRING "DB user")
 SET(TEST_DB_PASSWD "" CACHE STRING "DB password")
 
-add_test(Connect connect)
-add_test(MultiThreads threads)
-add_test(SimpleQuery query)
-add_test(PrepStmt-C prepstmtc)
-add_test(PrepStmt-C++ prepstmtcpp)
-add_test(Example example)
-add_test(Async async)
-
 SET(TMP "TEST_DB_URI=${TEST_DB_URI}")
 SET(TMP "${TMP};TEST_DB_USER=${TEST_DB_USER}")
 SET(TMP "${TMP};TEST_DB_PASSWD=${TEST_DB_PASSWD}")
-SET_TESTS_PROPERTIES(
-    Connect MultiThreads SimpleQuery PrepStmt-C PrepStmt-C++ Example
-    PROPERTIES ENVIRONMENT "${TMP}")
+
+function(create_test TARGET)
+  add_executable(${TARGET} ${ARGN})
+  if(POLICY CMP0091)
+    set_property(TARGET ${TARGET} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  endif()
+  set_property(TARGET ${TARGET} PROPERTY ENVIRONMENT "${TMP}")
+  add_test(NAME ${TARGET} COMMAND ${TARGET})
+endfunction()
+
+create_test(Connect connect)
+create_test(MultiThreads threads)
+create_test(SimpleQuery query)
+create_test(PrepStmt-C prepstmtc)
+create_test(PrepStmt-C++ prepstmtcpp)
+create_test(Example example)
+create_test(Async async)
 
 link_libraries(
     mariacpp
     "${MARIADB_LIBRARY}")
+
 if (WIN32)
   link_libraries(ws2_32)
 endif()
@@ -50,13 +57,3 @@ endif()
 include_directories(
     ${MARIADB_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR})
-
-string(REGEX REPLACE "/EHsc?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-add_executable(connect connect.cpp)
-add_executable(threads threads.cpp)
-add_executable(query query.cpp)
-add_executable(prepstmtc prepstmtc.cpp)
-add_executable(prepstmtcpp prepstmtcpp.cpp)
-add_executable(example example.cpp)
-add_executable(async async.cpp)

@@ -21,39 +21,33 @@ FILE(GLOB SRC *.cpp *.c)
 INCLUDE_DIRECTORIES(${MARIADB_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
 ADD_LIBRARY(mariacpp STATIC ${SRC})
 
-MESSAGE("-- ${CMAKE_BUILD_TYPE} build")
+target_compile_features(mariacpp PUBLIC cxx_std_23)
+
+MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
+MESSAGE("-- Compiler: ${CMAKE_CXX_COMPILER_ID}")
+
+OPTION(ASAN "Enable Address Sanitizer" OFF)
+
+set_property(TARGET mariacpp PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d)
 
 # windows clang-cl
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    MESSAGE("-- Compiler: clang-cl")
-    target_compile_options(mariacpp PUBLIC /EHa /MT$<$<CONFIG:Debug>:d>)
     add_compile_definitions(WIN32)
 endif()
 
 # msvc
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    MESSAGE("-- Compiler: MSVC")
-
-    set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
-    foreach(CompilerFlag ${CompilerFlags})
-        string(REPLACE "/MDd?" "" ${CompilerFlag} "${${CompilerFlag}}")
-        set(${CompilerFlag} "${${CompilerFlag}}" CACHE STRING "msvc compiler flags" FORCE)
-    endforeach()
-    string(REGEX REPLACE "/EHs?c?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-    target_compile_options(mariacpp PUBLIC /EHa /Zc:__cplusplus /MT$<$<CONFIG:Debug>:d>)
+    target_compile_options(mariacpp PUBLIC /Zc:__cplusplus)
 endif()
 
-set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d)
 
-if(DEFINED ASAN)
-    MESSAGE("-- address sanitizer enabled")
-    get_target_property(suffix mariacpp DEBUG_POSTFIX)
-    set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX ${suffix}_as)
+if(ASAN)
+    MESSAGE("-- Address sanitizer enabled")
+    set_target_properties(mariacpp PROPERTIES DEBUG_POSTFIX d_as)
+    set_target_properties(mariacpp PROPERTIES RELEASE_POSTFIX _as)
     target_compile_options(mariacpp PUBLIC /fsanitize=address)
-    add_compile_definitions(_DISABLE_VECTOR_ANNOTATION)
-    add_compile_definitions(_DISABLE_STRING_ANNOTATION)
-    set(ignoreMe "${ASAN}")
 endif()
 
 INSTALL(TARGETS mariacpp

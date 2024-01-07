@@ -17,9 +17,16 @@
 #  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 # ****************************************************************************
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.9)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.25)
+
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+
 PROJECT(mariacpp)
-SET(CMAKE_CXX_STANDARD 20)
+
+set_property(GLOBAL PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 find_library(MARIADB_LIBRARY
         NAMES libmariadb mariadb
@@ -49,9 +56,9 @@ if(result AND CMAKE_BUILD_TYPE STREQUAL "Release")
   set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-enable_testing()
-add_subdirectory(mariacpp)
 add_subdirectory(src)
 if(CMAKE_PROJECT_NAME STREQUAL mariacpp AND BUILD_TESTING)
+  enable_testing()
   add_subdirectory(test)
 endif()
+add_subdirectory(mariacpp)
