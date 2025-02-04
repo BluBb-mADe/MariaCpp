@@ -22,7 +22,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <iosfwd>
-#include <cstring>
 #include <stacktrace>
 #include <utility>
 
@@ -63,7 +62,7 @@ namespace MariaCpp {
         return ex.print(os), os;
     }
 
-    class InvalidArgumentException : public mariadb_error {
+    class InvalidArgumentException final : public mariadb_error {
     public:
         explicit InvalidArgumentException(const std::string& reason) : mariadb_error(reason) {}
     };

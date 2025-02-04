@@ -22,7 +22,6 @@
 #include <mariacpp/resultset.hpp>
 #include <mariacpp/time.hpp>
 #include <mariacpp/bits/bind.hpp>
-#include <cstdlib>
 #include <memory>
 #include <vector>
 #include <algorithm>

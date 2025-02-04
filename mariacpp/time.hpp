@@ -89,6 +89,10 @@ namespace MariaCpp {
 		    return T::from_time_t(to_time_t());
 	    }
 
+	    year_month_day to_ymd() const {
+	        return {std::chrono::year(year), std::chrono::month(month), std::chrono::day(day)};
+        }
+
 	    void print(std::ostream& os) const;
     };
 

@@ -30,14 +30,14 @@ set_property(GLOBAL PROPERTY
 
 find_library(MARIADB_LIBRARY
         NAMES libmariadb mariadb
-        PATH_SUFFIXES mariadb lib
+        PATH_SUFFIXES lib mysql mariadb
         REQUIRED)
 
 MESSAGE("-- Found mariadb library: ${MARIADB_LIBRARY}")
 
 find_path(MARIADB_INCLUDE_DIR
     mysql.h
-    PATH_SUFFIXES .. include ../include lib mysql
+    PATH_SUFFIXES .. include mysql mariadb
     REQUIRED)
 
 MESSAGE("-- Found mariadb include: ${MARIADB_INCLUDE_DIR}")
