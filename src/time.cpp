@@ -37,13 +37,22 @@ namespace MariaCpp {
         return tm;
     }
 
-    Time Time::date(year_t year, month_t month, day_t day) {
-        MYSQL_TIME tm = MYSQL_TIME();
-        tm.year = year;
-        tm.month = month;
-        tm.day = day;
-        tm.time_type = MYSQL_TIMESTAMP_DATE;
-        return tm;
+Time Time::date(year_t year, month_t month, day_t day) {
+        return MYSQL_TIME{
+            .year = year,
+            .month = month,
+            .day = day,
+            .time_type = MYSQL_TIMESTAMP_DATE
+        };
+    }
+
+    Time Time::date(year_month_day ymd) {
+        return MYSQL_TIME{
+            .year = static_cast<uint32_t>(static_cast<int32_t>(ymd.year())),
+            .month = static_cast<unsigned int>(ymd.month()),
+            .day = static_cast<unsigned int>(ymd.day()),
+            .time_type = MYSQL_TIMESTAMP_DATE
+        };
     }
 
     Time Time::datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second) {

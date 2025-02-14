@@ -49,28 +49,35 @@ namespace MariaCpp {
 
         static Time date(year_t year, month_t month, day_t day);
 
+    	static Time date(year_month_day ymd);
+
         static Time time(hour_t hour, minute_t minute, second_t second);
 
         static Time datetime(year_t year, month_t month, day_t day, hour_t hour, minute_t minute, second_t second);
 
-        template<typename T>
-        static Time datetime(time_point<T> tp) {
-            MYSQL_TIME t;
-            auto du = tp.time_since_epoch();
-            t.year = duration_cast<years>(du).count();
-            du -= years(t.year);
-            t.month = duration_cast<months>(du).count();
-            du -= months(t.month);
-            t.day = duration_cast<days>(du).count();
-            du -= days(t.day);
-            t.hour = duration_cast<hours>(du).count();
-            du -= hours(t.hour);
-            t.minute = duration_cast<minutes>(du).count();
-            du -= minutes(t.minute);
-            t.second = duration_cast<seconds>(du).count();
-            du -= seconds(t.second);
-            t.second_part = duration_cast<milliseconds>(du).count();
-            return t;
+        template<typename T, typename U>
+        static Time datetime(time_point<T, U> tp) {
+        	auto datePoint = floor<days>(tp);
+        	year_month_day ymd{datePoint};
+
+        	MYSQL_TIME mysqlTime{};
+        	mysqlTime.year  = static_cast<int>(ymd.year());
+        	mysqlTime.month = static_cast<unsigned int>(ymd.month());
+        	mysqlTime.day   = static_cast<unsigned int>(ymd.day());
+
+        	auto timeOfDay = tp - datePoint;
+        	hh_mm_ss todComponents{timeOfDay};
+
+        	mysqlTime.hour   = todComponents.hours().count();
+        	mysqlTime.minute = todComponents.minutes().count();
+        	mysqlTime.second = todComponents.seconds().count();
+
+        	auto fractional = timeOfDay - todComponents.to_duration();
+        	mysqlTime.second_part = static_cast<unsigned int>(
+				std::chrono::duration_cast<milliseconds>(fractional).count()
+			);
+
+        	return mysqlTime;
         }
 
 	    time_t to_time_t() {
